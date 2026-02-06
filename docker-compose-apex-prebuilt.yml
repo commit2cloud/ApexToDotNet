@@ -1,0 +1,42 @@
+version: '3.8'
+
+# Alternative Docker Compose using pre-built APEX image
+# This image includes Oracle XE + APEX + ORDS pre-configured
+
+services:
+  apex-db:
+    image: eses/oracle-apex:latest
+    container_name: ${CONTAINER_NAME:-apex-db}
+    hostname: ${HOSTNAME:-apex-db}
+    ports:
+      - "${DB_PORT:-1521}:1521"
+      - "${APEX_PORT:-8080}:8080"
+    environment:
+      # Database passwords
+      ORACLE_PWD: ${ORACLE_PWD:-Oracle123!}
+      ORACLE_CHARACTERSET: ${ORACLE_CHARACTERSET:-AL32UTF8}
+    volumes:
+      # Persistent storage for database files
+      - oracle-data:/opt/oracle/oradata
+      # ORDS configuration files
+      - ords-config:/opt/oracle/ords/config
+    networks:
+      - ${NETWORK_NAME:-apex-network}
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-2G}
+        reservations:
+          memory: ${MEMORY_RESERVATION:-1G}
+    restart: unless-stopped
+    shm_size: ${SHM_SIZE:-1gb}
+
+volumes:
+  oracle-data:
+    driver: local
+  ords-config:
+    driver: local
+
+networks:
+  apex-network:
+    driver: bridge
