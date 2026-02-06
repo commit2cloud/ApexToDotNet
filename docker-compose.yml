@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  apex-db:
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    container_name: ${CONTAINER_NAME:-apex-db}
+    hostname: ${HOSTNAME:-apex-db}
+    ports:
+      - "${DB_PORT:-1521}:1521"
+      - "${APEX_PORT:-8080}:8080"
+      - "${EM_EXPRESS_PORT:-5500}:5500"
+    environment:
+      # Database passwords - CHANGE THESE IN PRODUCTION!
+      ORACLE_PWD: ${ORACLE_PWD:-Oracle123!}
+      # Character set
+      ORACLE_CHARACTERSET: ${ORACLE_CHARACTERSET:-AL32UTF8}
+      # Enable APEX installation
+      ENABLE_ARCHIVELOG: "false"
+    volumes:
+      # Persistent storage for database files
+      - oracle-data:/opt/oracle/oradata
+      # APEX configuration files
+      - ords-config:/opt/oracle/ords/config
+      # Initialization scripts (optional)
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - ${NETWORK_NAME:-apex-network}
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s / as sysdba | grep -q 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-2G}
+        reservations:
+          memory: ${MEMORY_RESERVATION:-1G}
+    restart: unless-stopped
+    shm_size: ${SHM_SIZE:-1gb}
+
+volumes:
+  # Named volume for persistent database storage
+  oracle-data:
+    driver: local
+  # Named volume for ORDS configuration
+  ords-config:
+    driver: local
+
+networks:
+  apex-network:
+    driver: bridge

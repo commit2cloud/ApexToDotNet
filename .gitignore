@@ -1,0 +1,26 @@
+# Environment files with secrets
+.env
+
+# Docker volumes and data
+docker-data/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Oracle APEX exports (may contain sensitive data)
+# Uncomment to exclude APEX exports
+# apex-exports/
+# *.sql

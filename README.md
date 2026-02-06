@@ -7,6 +7,23 @@ This repository contains tools, guidance, and best practices for migrating Oracl
 
 ## Getting Started
 
+### Setting Up Oracle APEX
+
+Before migrating APEX applications, you'll need a local Oracle APEX instance for development and testing:
+
+📖 **[Oracle APEX Setup Guide](docs/oracle-apex-setup.md)** - Complete instructions for setting up a stand-alone APEX instance using Docker
+
+🚀 **[Quick Start Guide](docs/QUICKSTART.md)** - Get up and running in 5 minutes
+
+Quick start:
+```bash
+docker-compose up -d
+```
+
+Then access APEX at: http://localhost:8080/ords
+
+### Migration Guidance
+
 For comprehensive migration guidance, see the [Copilot Agent Instructions](.github/agents/apex-to-dotnet-migration-guide.md) which provide:
 
 - **10-step migration approach** covering everything from workflow inventory to delivery planning
@@ -25,6 +42,8 @@ For comprehensive migration guidance, see the [Copilot Agent Instructions](.gith
 
 ## Documentation
 
+- [Quick Start Guide](docs/QUICKSTART.md) - Get Oracle APEX running in 5 minutes
+- [Oracle APEX Setup Guide](docs/oracle-apex-setup.md) - Comprehensive setup guide with troubleshooting
 - [APEX to .NET Migration Guide](.github/agents/apex-to-dotnet-migration-guide.md) - Comprehensive migration strategy and implementation guide
 - [Agent Instructions README](.github/agents/README.md) - Overview of Copilot Agent guidance
 
