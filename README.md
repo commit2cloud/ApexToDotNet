@@ -13,6 +13,8 @@ Before migrating APEX applications, you'll need a local Oracle APEX instance for
 
 📖 **[Oracle APEX Setup Guide](docs/oracle-apex-setup.md)** - Complete instructions for setting up a stand-alone APEX instance using Docker
 
+🚀 **[Quick Start Guide](docs/QUICKSTART.md)** - Get up and running in 5 minutes
+
 Quick start:
 ```bash
 docker-compose up -d
@@ -40,7 +42,8 @@ For comprehensive migration guidance, see the [Copilot Agent Instructions](.gith
 
 ## Documentation
 
-- [Oracle APEX Setup Guide](docs/oracle-apex-setup.md) - Set up a stand-alone Oracle APEX instance for development
+- [Quick Start Guide](docs/QUICKSTART.md) - Get Oracle APEX running in 5 minutes
+- [Oracle APEX Setup Guide](docs/oracle-apex-setup.md) - Comprehensive setup guide with troubleshooting
 - [APEX to .NET Migration Guide](.github/agents/apex-to-dotnet-migration-guide.md) - Comprehensive migration strategy and implementation guide
 - [Agent Instructions README](.github/agents/README.md) - Overview of Copilot Agent guidance
 
