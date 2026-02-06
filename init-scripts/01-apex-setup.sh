@@ -6,9 +6,32 @@ echo "=========================================="
 echo "Starting APEX post-initialization setup..."
 echo "=========================================="
 
-# Wait for database to be fully ready
+# Wait for database to be fully ready with polling
 echo "Waiting for database to be ready..."
-sleep 30
+MAX_ATTEMPTS=60
+ATTEMPT=0
+
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+    if sqlplus -s / as sysdba <<EOF > /dev/null 2>&1
+SET HEADING OFF
+SET FEEDBACK OFF
+SELECT status FROM v\$instance;
+EXIT
+EOF
+    then
+        echo "Database is ready!"
+        break
+    fi
+    
+    ATTEMPT=$((ATTEMPT + 1))
+    echo "Waiting for database... attempt $ATTEMPT of $MAX_ATTEMPTS"
+    sleep 5
+done
+
+if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+    echo "ERROR: Database did not become ready in time"
+    exit 1
+fi
 
 # Set up APEX workspace and configuration
 sqlplus -s sys/${ORACLE_PWD}@XE as sysdba <<EOF

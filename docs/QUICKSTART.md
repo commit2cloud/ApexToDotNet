@@ -59,7 +59,7 @@ Default credentials:
    - Great for learning and testing
 
 3. **Review Migration Guide**
-   - See [APEX to .NET Migration Guide](.github/agents/apex-to-dotnet-migration-guide.md)
+   - See [APEX to .NET Migration Guide](../.github/agents/apex-to-dotnet-migration-guide.md)
    - Understand the migration workflow approach
 
 ## Common Commands

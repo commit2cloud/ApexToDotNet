@@ -499,7 +499,7 @@ EOF
 After setting up your Oracle APEX instance:
 
 1. **Import Sample Applications**: Oracle provides sample apps to explore APEX features
-2. **Review the Migration Guide**: Check out [.github/agents/apex-to-dotnet-migration-guide.md](.github/agents/apex-to-dotnet-migration-guide.md)
+2. **Review the Migration Guide**: Check out [../.github/agents/apex-to-dotnet-migration-guide.md](../.github/agents/apex-to-dotnet-migration-guide.md)
 3. **Create a Test Application**: Build a simple APEX app to understand the framework
 4. **Start Migration Planning**: Use the workflow inventory approach described in our guides
 
@@ -508,7 +508,7 @@ After setting up your Oracle APEX instance:
 - [Oracle APEX Documentation](https://docs.oracle.com/en/database/oracle/apex/24.2/)
 - [APEX Community Forum](https://community.oracle.com/tech/developers/categories/application-express)
 - [APEX API Reference](https://docs.oracle.com/en/database/oracle/apex/24.2/aeapi/)
-- [ApexToDotNet Migration Guide](.github/agents/apex-to-dotnet-migration-guide.md)
+- [ApexToDotNet Migration Guide](../.github/agents/apex-to-dotnet-migration-guide.md)
 - [Oracle Learning Library - APEX](https://apexapps.oracle.com/pls/apex/f?p=44785:1)
 
 ## Support

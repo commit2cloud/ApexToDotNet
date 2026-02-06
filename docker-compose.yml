@@ -3,17 +3,17 @@ version: '3.8'
 services:
   apex-db:
     image: container-registry.oracle.com/database/express:21.3.0-xe
-    container_name: apex-db
-    hostname: apex-db
+    container_name: ${CONTAINER_NAME:-apex-db}
+    hostname: ${HOSTNAME:-apex-db}
     ports:
-      - "1521:1521"
-      - "8080:8080"
-      - "5500:5500"
+      - "${DB_PORT:-1521}:1521"
+      - "${APEX_PORT:-8080}:8080"
+      - "${EM_EXPRESS_PORT:-5500}:5500"
     environment:
       # Database passwords - CHANGE THESE IN PRODUCTION!
-      ORACLE_PWD: Oracle123!
+      ORACLE_PWD: ${ORACLE_PWD:-Oracle123!}
       # Character set
-      ORACLE_CHARACTERSET: AL32UTF8
+      ORACLE_CHARACTERSET: ${ORACLE_CHARACTERSET:-AL32UTF8}
       # Enable APEX installation
       ENABLE_ARCHIVELOG: "false"
     volumes:
@@ -24,9 +24,9 @@ services:
       # Initialization scripts (optional)
       - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
-      - apex-network
+      - ${NETWORK_NAME:-apex-network}
     healthcheck:
-      test: ["CMD", "sqlplus", "-s", "sys/Oracle123!@XE", "as", "sysdba", "@/dev/null"]
+      test: ["CMD-SHELL", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s / as sysdba | grep -q 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -34,11 +34,11 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: ${MEMORY_LIMIT:-2G}
         reservations:
-          memory: 1G
+          memory: ${MEMORY_RESERVATION:-1G}
     restart: unless-stopped
-    shm_size: 1gb
+    shm_size: ${SHM_SIZE:-1gb}
 
 volumes:
   # Named volume for persistent database storage
