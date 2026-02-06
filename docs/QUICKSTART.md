@@ -83,9 +83,9 @@ docker-compose down -v
 
 ## Need Help?
 
-- **Full Documentation:** [docs/oracle-apex-setup.md](docs/oracle-apex-setup.md)
+- **Full Documentation:** [oracle-apex-setup.md](oracle-apex-setup.md)
 - **Troubleshooting:** See the troubleshooting section in the full guide
-- **Init Scripts:** [init-scripts/README.md](init-scripts/README.md)
+- **Init Scripts:** [../init-scripts/README.md](../init-scripts/README.md)
 
 ## Troubleshooting Quick Fixes
 
@@ -129,4 +129,4 @@ To customize your setup:
 
 ---
 
-📚 For comprehensive documentation, troubleshooting, and advanced configuration, see the [full setup guide](docs/oracle-apex-setup.md).
+📚 For comprehensive documentation, troubleshooting, and advanced configuration, see the [full setup guide](oracle-apex-setup.md).
