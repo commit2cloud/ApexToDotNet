@@ -1,0 +1,70 @@
+<div class="edit-container">
+  <div class="header">
+    <h2>{{ isEditMode ? 'Edit Session' : 'New Session' }}</h2>
+    <a routerLink="/sessions" class="back-link">Back to List</a>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="sessionForm" (ngSubmit)="saveSession()" class="session-form">
+    
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input id="title" type="text" formControlName="title" [class.invalid]="sessionForm.get('title')?.invalid && sessionForm.get('title')?.touched">
+      <div *ngIf="sessionForm.get('title')?.invalid && sessionForm.get('title')?.touched" class="error-text">
+        Title is required (max 50 chars).
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="sessionType">Session Type *</label>
+        <select id="sessionType" formControlName="sessionType">
+          <option value="General">General</option>
+          <option value="Break">Break</option>
+          <option value="Technical">Technical</option>
+          <option value="Hands-On">Hands-On</option>
+          <option value="Business">Business</option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="showSpeaker">
+        <label for="speaker">Speaker</label>
+        <input id="speaker" type="text" formControlName="speaker">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="startDate">Start Date/Time *</label>
+        <input id="startDate" type="datetime-local" formControlName="startDate" [class.invalid]="sessionForm.get('startDate')?.invalid && sessionForm.get('startDate')?.touched">
+      </div>
+
+      <div class="form-group">
+        <label for="endDate">End Date/Time *</label>
+        <input id="endDate" type="datetime-local" formControlName="endDate" [class.invalid]="sessionForm.get('endDate')?.invalid && sessionForm.get('endDate')?.touched">
+      </div>
+    </div>
+    
+    <div *ngIf="sessionForm.errors?.['dateRangeInvalid'] && (sessionForm.get('startDate')?.touched || sessionForm.get('endDate')?.touched)" class="error-text global-error">
+      Start Date cannot be after End Date.
+    </div>
+
+    <div class="form-group">
+      <label for="status">Status *</label>
+      <select id="status" formControlName="status">
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" routerLink="/sessions" class="btn-cancel">Cancel</button>
+      <button type="submit" [disabled]="sessionForm.invalid || isLoading" class="btn-save">
+        {{ isLoading ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+  </form>
+</div>

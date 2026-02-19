@@ -1,0 +1,16 @@
+<div class="calendar-container">
+  <div class="header">
+    <div class="title-section">
+      <h2>Calendar</h2>
+      <p class="subtitle">View and manage sessions schedule</p>
+    </div>
+    <div class="actions">
+        <a routerLink="/sessions" class="btn-secondary">List View</a>
+        <a routerLink="/sessions/new" class="btn-primary">Add Session</a>
+    </div>
+  </div>
+
+  <div class="calendar-wrapper">
+    <full-calendar [options]="calendarOptions"></full-calendar>
+  </div>
+</div>

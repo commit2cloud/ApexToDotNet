@@ -1,8 +1,50 @@
 # Environment files with secrets
 .env
+.env.local
+.env.*.local
+*.env
+!.env.example
+!.env.oci.template
 
-# Docker volumes and data
-docker-data/
+# Application settings with credentials
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
+# OCI and Oracle credentials
+.oci/
+wallet/
+*.wallet
+tnsnames.ora
+sqlnet.ora
+cwallet.sso
+ewallet.p12
+*.pem
+*.key
+
+# .NET build artifacts
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Node.js dependencies and build artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+.angular/
+.angular-cache/
 
 # IDE and editor files
 .vscode/
@@ -11,16 +53,43 @@ docker-data/
 *.swo
 *~
 .DS_Store
+*.code-workspace
 
 # Logs
 *.log
+logs/
 
 # Temporary files
 tmp/
 temp/
 *.tmp
+*.bak
+*.backup
 
-# Oracle APEX exports (may contain sensitive data)
-# Uncomment to exclude APEX exports
-# apex-exports/
-# *.sql
+# Test results
+TestResults/
+coverage/
+*.trx
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Screenshots with potentially sensitive data
+# Uncomment if screenshots contain customer data
+# screenshots/
+
+# Documentation cleanup artifacts
+CLEANUP_COMPLETE.md
+CLEANUP_SUMMARY.md
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini

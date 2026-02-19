@@ -1,0 +1,317 @@
+<div class="project-detail-page" *ngIf="!isLoading && project">
+  <!-- Header -->
+  <div class="project-header">
+    <div class="header-row">
+      <div class="back-button">
+        <a routerLink="/projects" class="btn-back">
+          <span class="icon">↑</span> Projects
+        </a>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" (click)="toggleFavorite()" [class.active]="isFavorite" title="Add to favorites">
+          <span>{{ isFavorite ? '♥' : '♡' }}</span>
+        </button>
+        <button class="icon-btn" title="More actions">
+          <span>⋮</span>
+        </button>
+      </div>
+    </div>
+    
+    <h1 class="project-name">{{ project.name }}</h1>
+    
+    <!-- Project Metadata Grid -->
+    <div class="metadata-grid">
+      <div class="metadata-item">
+        <label>Initiative</label>
+        <div class="value">{{ project.initiativeName || 'Initiative 1' }}</div>
+      </div>
+      <div class="metadata-item">
+        <label>Focus Area</label>
+        <div class="value empty">-</div>
+      </div>
+      <div class="metadata-item">
+        <label>Owner</label>
+        <div class="value">John Doe</div>
+      </div>
+      <div class="metadata-item">
+        <label>Completeness</label>
+        <div class="value">{{ getCompletionStatus() }} - {{ getCompletionPercentage() }}%</div>
+      </div>
+      <div class="metadata-item">
+        <label>Status</label>
+        <div class="value">{{ project.status || 'Not Set' }}</div>
+      </div>
+      <div class="metadata-item">
+        <label>Priority</label>
+        <div class="value">
+          <span class="priority-badge" [class]="getPriorityClass(project.priority)">
+            {{ getPriorityLabel(project.priority) }}
+          </span>
+        </div>
+      </div>
+      <div class="metadata-item">
+        <label>Size</label>
+        <div class="value">M</div>
+      </div>
+      <div class="metadata-item">
+        <label>Target</label>
+        <div class="value">
+          <span class="badge badge-target">No Target (Alpha R1'10)</span>
+        </div>
+      </div>
+      <div class="metadata-item">
+        <label>Permalink</label>
+        <div class="value link">AAME-39</div>
+      </div>
+      <div class="metadata-item">
+        <label>My Favorite</label>
+        <div class="value">
+          <span class="favorite-icon" (click)="toggleFavorite()">{{ isFavorite ? '♥' : '♡' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-container">
+    <div class="tabs-nav">
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'comments'"
+        (click)="setActiveTab('comments')">
+        Comments
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'activity'"
+        (click)="setActiveTab('activity')">
+        Activity
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'description'"
+        (click)="setActiveTab('description')">
+        Description
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'contributors'"
+        (click)="setActiveTab('contributors')">
+        Contributors
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'milestones'"
+        (click)="setActiveTab('milestones')">
+        Milestones
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'reviews'"
+        (click)="setActiveTab('reviews')">
+        Reviews
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'tasks'"
+        (click)="setActiveTab('tasks')">
+        Tasks
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'links'"
+        (click)="setActiveTab('links')">
+        Links
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'documents'"
+        (click)="setActiveTab('documents')">
+        Documents
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'related'"
+        (click)="setActiveTab('related')">
+        Related
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Comments Tab -->
+    <div *ngIf="activeTab === 'comments'" class="comments-panel">
+      <!-- Add Comment Form -->
+      <div class="add-comment-form">
+        <textarea 
+          [(ngModel)]="newComment"
+          placeholder="Add a comment..."
+          class="comment-input"
+          rows="3">
+        </textarea>
+        <div class="comment-form-actions">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="isPrivateComment" />
+            <span>This is a private comment</span>
+          </label>
+          <button (click)="addComment()" class="btn-primary" [disabled]="!newComment.trim()">
+            Add Comment
+          </button>
+        </div>
+      </div>
+
+      <!-- Comments List -->
+      <div class="comments-list">
+        <div *ngFor="let comment of comments" class="comment-item">
+          <div class="comment-header">
+            <div class="comment-avatar">{{ comment.authorInitials }}</div>
+            <div class="comment-meta">
+              <span class="comment-author">{{ comment.author }}</span>
+              <span class="comment-time">{{ getTimeSince(comment.createdDate) }}</span>
+            </div>
+            <div class="comment-actions">
+              <button class="icon-btn-small" title="Edit">✎</button>
+              <button class="icon-btn-small" title="Delete">🗑</button>
+            </div>
+          </div>
+          <div class="comment-body">
+            <div *ngIf="comment.isPrivate" class="private-badge">
+              <span class="icon">🔒</span> This is a private comment
+            </div>
+            <p>{{ comment.content }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="comments.length === 0" class="empty-comments">
+          <p>No comments yet. Be the first to comment!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Tab -->
+    <div *ngIf="activeTab === 'activity'" class="activity-panel">
+      <div class="activity-list">
+        <div *ngFor="let activity of activities" class="activity-item">
+          <div class="activity-icon">●</div>
+          <div class="activity-content">
+            <div class="activity-header">
+              <strong>{{ activity.author }}</strong> {{ activity.action }}
+            </div>
+            <div *ngIf="activity.details" class="activity-details">{{ activity.details }}</div>
+            <div class="activity-time">{{ getTimeSince(activity.timestamp) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description Tab -->
+    <div *ngIf="activeTab === 'description'" class="description-panel">
+      <div class="content-section">
+        <h3>Description</h3>
+        <p>{{ project.description || 'No description provided.' }}</p>
+      </div>
+    </div>
+
+    <!-- Other Tabs (Placeholder) -->
+    <div *ngIf="activeTab === 'contributors'" class="content-panel">
+      <div class="empty-state">
+        <p>No contributors assigned yet.</p>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'milestones'" class="content-panel">
+      <div class="empty-state">
+        <p>No milestones defined yet.</p>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'reviews'" class="content-panel">
+      <div class="empty-state">
+        <p>No reviews available.</p>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tasks'" class="content-panel">
+      <div class="empty-state">
+        <p>No tasks created yet.</p>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'links'" class="content-panel">
+      <div class="empty-state">
+        <p>No links added yet.</p>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'documents'" class="content-panel">
+      <div class="empty-state">
+        <p>No documents uploaded yet.</p>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'related'" class="content-panel">
+      <div class="empty-state">
+        <p>No related items found.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Metadata -->
+  <div class="project-footer">
+    <div class="footer-row">
+      <div class="footer-item">
+        <label>Area</label>
+        <span>{{ projectMetadata.area }}</span>
+      </div>
+      <div class="footer-item">
+        <label>Group</label>
+        <span>{{ projectMetadata.group || '-' }}</span>
+      </div>
+      <div class="footer-item">
+        <label>Created</label>
+        <span>{{ projectMetadata.created }}</span>
+      </div>
+      <div class="footer-item">
+        <label>Created By</label>
+        <span>{{ projectMetadata.createdBy }}</span>
+      </div>
+      <div class="footer-item">
+        <label>Updated</label>
+        <span>{{ projectMetadata.updated }}</span>
+      </div>
+      <div class="footer-item">
+        <label>Updated By</label>
+        <span>{{ projectMetadata.updatedBy }}</span>
+      </div>
+      <div class="footer-item">
+        <label>Changes</label>
+        <span>{{ projectMetadata.changes }}</span>
+      </div>
+      <div class="footer-item">
+        <label>Interactions</label>
+        <span>{{ projectMetadata.interactions }} by {{ projectMetadata.interactionUsers }} users</span>
+      </div>
+      <div class="footer-item">
+        <label>Patroned</label>
+        <span>{{ projectMetadata.patroned }}</span>
+      </div>
+    </div>
+    <div class="footer-tools">
+      <span class="version-info">24.27 Built with ❤️ using Oracle APEX</span>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-state">
+  <div class="spinner"></div>
+  <p>Loading project details...</p>
+</div>
+
+<!-- Error State -->
+<div *ngIf="!isLoading && !project" class="error-state">
+  <h3>Project Not Found</h3>
+  <p>The project you're looking for doesn't exist or has been deleted.</p>
+  <a routerLink="/projects" class="btn-secondary">Back to Projects</a>
+</div>

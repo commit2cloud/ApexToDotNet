@@ -95,31 +95,81 @@ For each workflow, document:
 ## 💻 Technology Stack
 
 ### Backend
-- **Framework**: ASP.NET Core 6.0+
-- **Language**: C# 10+
-- **ORM**: Entity Framework Core or Dapper
-- **Database**: Oracle.ManagedDataAccess.Core
-- **API**: RESTful with OpenAPI/Swagger
-- **Auth**: JWT tokens or OAuth 2.0
+- **Framework**: ASP.NET Core 10
+- **Language**: C# 12
+- **Database Driver**: Oracle.ManagedDataAccess.Core
+- **API Style**: RESTful with Swagger/OpenAPI
+- **Auth**: JWT tokens or OAuth 2.0 (planned)
+- **Integration**: ORDS (Oracle REST Data Services)
 
 ### Frontend
-- **Framework**: Angular 15+
-- **Language**: TypeScript 4.8+
-- **UI Library**: Angular Material, PrimeNG, or similar
-- **State Management**: RxJS, NgRx (for complex apps)
-- **Forms**: Reactive Forms
-- **HTTP**: Angular HttpClient
+- **Framework**: Angular 17 (standalone components)
+- **Language**: TypeScript 5
+- **UI**: Custom CSS (APEX-inspired styling)
+- **Calendar**: FullCalendar
+- **Forms**: Template-driven and Reactive Forms
+- **HTTP**: Angular HttpClient + RxJS
 
-### Database
-- **DBMS**: Oracle Database (existing)
-- **Migrations**: Flyway or Liquibase
-- **Tools**: SQL Developer, Oracle Data Modeler
+### Database & Integration
+- **DBMS**: Oracle Autonomous Database (OCI)
+- **APEX Version**: 24.2
+- **APEX App**: Strategic Planner (App 102)
+- **ORDS**: REST endpoints for data access
+- **Workspace**: apexdotnet
 
-### DevOps
+### Development Tools
 - **Version Control**: Git
-- **CI/CD**: GitHub Actions, Azure DevOps, Jenkins
-- **Containers**: Docker (optional)
-- **Testing**: xUnit, Jasmine/Karma, Playwright
+- **IDE**: VS Code
+- **Package Managers**: npm (Node), NuGet (.NET)
+- **Testing**: Planned (xUnit, Jasmine/Karma)
+
+---
+
+## 🚀 Quick Commands
+
+### Start Development Servers
+```bash
+# Start .NET API (Terminal 1)
+cd ApexToDotNet.API
+dotnet run
+
+# Start Angular (Terminal 2)
+cd ApexToDotNet.Web
+ng serve
+```
+
+### Build & Clean
+```bash
+# Clean and rebuild .NET
+cd ApexToDotNet.API
+dotnet clean && dotnet restore && dotnet build
+
+# Clean and reinstall Angular dependencies
+cd ApexToDotNet.Web
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Generate Components
+```bash
+# Generate new Angular component
+cd ApexToDotNet.Web
+ng generate component features/module-name/component-name
+
+# Generate new Angular service
+ng generate service services/service-name
+```
+
+### Production Build
+```bash
+# Build Angular for production
+cd ApexToDotNet.Web
+ng build --configuration production
+
+# Build .NET in Release mode
+cd ApexToDotNet.API
+dotnet build --configuration Release
+```
 
 ---
 
@@ -206,17 +256,30 @@ For each workflow, document:
 
 ## 🔗 Quick Links
 
-### Documentation
-- **Getting Started**: GETTING_STARTED_CLOUD_APEX.md
-- **Full Guide**: .github/agents/apex-to-dotnet-migration-guide.md
-- **Troubleshooting**: APEX_SETUP_TROUBLESHOOTING.md
-- **Copilot Help**: .github/agents/README.md
+### Project Documentation
+- **[Getting Started](GETTING_STARTED.md)** - Complete setup guide ⭐
+- **[Running the App](RUNNING_THE_APP.md)** - How to run frontend and backend
+- **[ORDS Endpoints Guide](ORDS_ENDPOINTS_GUIDE.md)** - Connect to APEX data
+- **[Projects Expansion](PROJECTS_EXPANSION_SUMMARY.md)** - Recent Projects updates
+- **[Component Patterns](COMPONENT_PATTERNS.md)** - Angular architecture
+
+### APEX Setup
+- **[OCI APEX Connection](OCI_APEX_CONNECTION.md)** - Connect to Oracle Cloud APEX
+- **[Cloud APEX Guide](GETTING_STARTED_CLOUD_APEX.md)** - Using APEX in OCI
+- **[APEX App Info](APEX_APP_INFO.md)** - Strategic Planner app details
+- **[Strategic Planner Analysis](STRATEGIC_PLANNER_ANALYSIS.md)** - App structure
+
+### Migration Strategy
+- **[Migration Guide](.github/agents/apex-to-dotnet-migration-guide.md)** - Full strategy
+- **[Agent Instructions](.github/agents/README.md)** - Copilot Agents overview
+- **[Copilot Instructions](.github/copilot-instructions.md)** - Agent context
 
 ### External Resources
-- **APEX Docs**: https://docs.oracle.com/en/database/oracle/apex/
+- **APEX Docs**: https://docs.oracle.com/en/database/oracle/apex/24.2/
+- **APEX API Reference**: https://docs.oracle.com/en/database/oracle/apex/24.2/aeapi/
 - **.NET Docs**: https://docs.microsoft.com/en-us/dotnet/
 - **Angular Docs**: https://angular.io/docs
-- **APEX Community**: https://community.oracle.com/apex
+- **Oracle OCI**: https://cloud.oracle.com/
 
 ---
 

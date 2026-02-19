@@ -1,0 +1,53 @@
+<div class="session-list-container">
+  <div class="header">
+    <div class="title-section">
+      <h2>Sessions</h2>
+      <p class="subtitle">Manage conference sessions and speakers</p>
+    </div>
+    <a routerLink="/sessions/new" class="btn-primary">Add Session</a>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    Loading sessions...
+  </div>
+
+  <div *ngIf="!isLoading && sessions.length === 0" class="empty-state">
+    No sessions found.
+  </div>
+
+  <table *ngIf="!isLoading && sessions.length > 0" class="session-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Type</th>
+        <th>Speaker</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let session of sessions">
+        <td>{{ session.title }}</td>
+        <td>
+          <span class="type-badge" [class.type-break]="session.sessionType === 'Break'">
+            {{ session.sessionType }}
+          </span>
+        </td>
+        <td>{{ session.speaker || '-' }}</td>
+        <td>{{ session.startDate | date:'short' }}</td>
+        <td>{{ session.endDate | date:'short' }}</td>
+        <td>
+          <span class="status-badge" [class.status-active]="session.status === 'Active'">
+            {{ session.status }}
+          </span>
+        </td>
+        <td class="actions">
+          <a [routerLink]="['/sessions', session.id]" class="btn-edit">Edit</a>
+          <button (click)="deleteSession(session.id)" class="btn-delete">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,87 @@
+<div class="edit-container">
+  <div class="header">
+    <h2>{{ isEditMode ? 'Edit Project' : 'New Project' }}</h2>
+    <a routerLink="/projects" class="back-link">Back to List</a>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="projectForm" (ngSubmit)="saveProject()" class="project-form">
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label for="projectName">Project Name *</label>
+        <input id="projectName" type="text" formControlName="projectName" [class.invalid]="projectForm.get('projectName')?.invalid && projectForm.get('projectName')?.touched">
+        <div *ngIf="projectForm.get('projectName')?.invalid && projectForm.get('projectName')?.touched" class="error-text">
+          Project Name is required (max 30 chars).
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="taskName">Task Name *</label>
+        <input id="taskName" type="text" formControlName="taskName" [class.invalid]="projectForm.get('taskName')?.invalid && projectForm.get('taskName')?.touched">
+        <div *ngIf="projectForm.get('taskName')?.invalid && projectForm.get('taskName')?.touched" class="error-text">
+          Task Name is required (max 255 chars).
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="startDate">Start Date *</label>
+        <input id="startDate" type="date" formControlName="startDate" [class.invalid]="projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched">
+      </div>
+
+      <div class="form-group">
+        <label for="endDate">End Date *</label>
+        <input id="endDate" type="date" formControlName="endDate" [class.invalid]="projectForm.get('endDate')?.invalid && projectForm.get('endDate')?.touched">
+      </div>
+    </div>
+    
+    <div *ngIf="projectForm.errors?.['dateRangeInvalid'] && (projectForm.get('startDate')?.touched || projectForm.get('endDate')?.touched)" class="error-text global-error">
+      Start Date cannot be after End Date.
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="status">Status *</label>
+        <select id="status" formControlName="status">
+          <option value="Pending">Pending</option>
+          <option value="Active">Active</option>
+          <option value="Closed">Closed</option>
+          <option value="On-Hold">On-Hold</option>
+          <option value="Open">Open</option>
+        </select>
+        <div *ngIf="projectForm.get('status')?.invalid && projectForm.get('status')?.touched" class="error-text">
+          Status is required.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="assignedTo">Assigned To</label>
+        <input id="assignedTo" type="text" formControlName="assignedTo">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="cost">Cost</label>
+        <input id="cost" type="number" formControlName="cost">
+      </div>
+
+      <div class="form-group">
+        <label for="budget">Budget</label>
+        <input id="budget" type="number" formControlName="budget">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" routerLink="/projects" class="btn-cancel">Cancel</button>
+      <button type="submit" [disabled]="projectForm.invalid || isLoading" class="btn-save">
+        {{ isLoading ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+  </form>
+</div>

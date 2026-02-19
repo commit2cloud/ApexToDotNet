@@ -1,0 +1,199 @@
+<div class="projects-page">
+  <!-- Left Sidebar with Filters -->
+  <aside class="filters-sidebar">
+    <div class="filter-header">
+      <h3>Filters</h3>
+      <button *ngIf="getFilterCount() > 0" (click)="clearAllFilters()" class="clear-filters">
+        Clear All ({{ getFilterCount() }})
+      </button>
+    </div>
+    
+    <!-- Area Filter -->
+    <div class="filter-section">
+      <div class="filter-section-header" (click)="toggleSection('area')">
+        <span class="toggle-icon">{{ collapsedSections.area ? '▶' : '▼' }}</span>
+        <span class="filter-label">Area</span>
+        <span *ngIf="filters.selectedAreas.length > 0" class="filter-badge">{{ filters.selectedAreas.length }}</span>
+      </div>
+      <div *ngIf="!collapsedSections.area" class="filter-options">
+        <label *ngFor="let area of areas" class="filter-option">
+          <input 
+            type="checkbox" 
+            [checked]="isFilterSelected('area', area.id)"
+            (change)="toggleFilter('area', area.id)"
+          />
+          <span>{{ area.name }}</span>
+          <span class="count">({{ area.projectCount || 0 }})</span>
+        </label>
+        <div *ngIf="areas.length === 0" class="no-options">No areas available</div>
+      </div>
+    </div>
+    
+    <!-- Initiative Filter -->
+    <div class="filter-section">
+      <div class="filter-section-header" (click)="toggleSection('initiative')">
+        <span class="toggle-icon">{{ collapsedSections.initiative ? '▶' : '▼' }}</span>
+        <span class="filter-label">Initiative</span>
+        <span *ngIf="filters.selectedInitiatives.length > 0" class="filter-badge">{{ filters.selectedInitiatives.length }}</span>
+      </div>
+      <div *ngIf="!collapsedSections.initiative" class="filter-options">
+        <label *ngFor="let initiative of initiatives" class="filter-option">
+          <input 
+            type="checkbox" 
+            [checked]="isFilterSelected('initiative', initiative.id)"
+            (change)="toggleFilter('initiative', initiative.id)"
+          />
+          <span>{{ initiative.name }}</span>
+        </label>
+        <div *ngIf="initiatives.length === 0" class="no-options">No initiatives available</div>
+      </div>
+    </div>
+    
+    <!-- Priority Filter -->
+    <div class="filter-section">
+      <div class="filter-section-header" (click)="toggleSection('priority')">
+        <span class="toggle-icon">{{ collapsedSections.priority ? '▶' : '▼' }}</span>
+        <span class="filter-label">Priority</span>
+        <span *ngIf="filters.selectedPriorities.length > 0" class="filter-badge">{{ filters.selectedPriorities.length }}</span>
+      </div>
+      <div *ngIf="!collapsedSections.priority" class="filter-options">
+        <label *ngFor="let priority of priorities" class="filter-option">
+          <input 
+            type="checkbox" 
+            [checked]="isFilterSelected('priority', priority)"
+            (change)="toggleFilter('priority', priority)"
+          />
+          <span class="priority-badge priority-{{priority}}">P{{ priority }}</span>
+        </label>
+      </div>
+    </div>
+    
+    <!-- Status Filter -->
+    <div class="filter-section">
+      <div class="filter-section-header" (click)="toggleSection('status')">
+        <span class="toggle-icon">{{ collapsedSections.status ? '▶' : '▼' }}</span>
+        <span class="filter-label">Status</span>
+        <span *ngIf="filters.selectedStatuses.length > 0" class="filter-badge">{{ filters.selectedStatuses.length }}</span>
+      </div>
+      <div *ngIf="!collapsedSections.status" class="filter-options">
+        <label *ngFor="let status of statuses" class="filter-option">
+          <input 
+            type="checkbox" 
+            [checked]="isFilterSelected('status', status)"
+            (change)="toggleFilter('status', status)"
+          />
+          <span>{{ status }}</span>
+        </label>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="projects-content">
+    <!-- Header with Search and Actions -->
+    <div class="content-header">
+      <div class="header-left">
+        <h1>Projects</h1>
+      </div>
+      <div class="header-right">
+        <a routerLink="/projects/new" class="btn-primary">
+          <span class="icon">+</span> New Project
+        </a>
+      </div>
+    </div>
+    
+    <!-- Search and Sort Bar -->
+    <div class="search-bar">
+      <div class="search-input-wrapper">
+        <input 
+          type="text" 
+          [(ngModel)]="filters.searchQuery"
+          (ngModelChange)="applyFilters()"
+          placeholder="Search projects..."
+          class="search-input"
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+      <select [(ngModel)]="filters.sortBy" (ngModelChange)="applyFilters()" class="sort-select">
+        <option value="updatedDesc">Updated (Newest)</option>
+        <option value="updatedAsc">Updated (Oldest)</option>
+        <option value="nameAsc">Name (A-Z)</option>
+        <option value="nameDesc">Name (Z-A)</option>
+        <option value="priorityAsc">Priority (Low to High)</option>
+        <option value="priorityDesc">Priority (High to Low)</option>
+      </select>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading projects...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && filteredProjects.length === 0" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No projects found</h3>
+      <p *ngIf="getFilterCount() > 0">Try adjusting your filters</p>
+      <p *ngIf="getFilterCount() === 0">Create your first project to get started</p>
+      <button *ngIf="getFilterCount() > 0" (click)="clearAllFilters()" class="btn-secondary">
+        Clear Filters
+      </button>
+    </div>
+
+    <!-- Projects Grid -->
+    <div *ngIf="!isLoading && filteredProjects.length > 0" class="projects-grid">
+      <div *ngFor="let project of filteredProjects" class="project-card">
+        <!-- Card Header -->
+        <div class="card-header">
+          <div class="badges">
+            <span class="badge badge-release">{{ project.initiativeName || 'Alpha R1\'10' }}</span>
+            <span class="badge badge-status">{{ project.status || 'No Target' }}</span>
+          </div>
+          <div class="card-actions">
+            <button class="icon-btn favorite" title="Add to favorites">
+              <span>♡</span>
+            </button>
+            <button class="icon-btn more" title="More actions">
+              <span>⋮</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Card Body -->
+        <div class="card-body">
+          <div class="project-id">{{ project.areaName || 'Area' }} / Initiative {{ project.initiativeId || 1 }}</div>
+          <h3 class="project-title">
+            <a [routerLink]="['/projects', project.id]">{{ project.name }}</a>
+          </h3>
+          <p class="project-owner">John Doe</p>
+          
+          <!-- Progress Bar -->
+          <div class="progress-section">
+            <div class="progress-info">
+              <span class="progress-text">
+                <span class="priority-badge priority-{{project.priority}}">P{{ project.priority }}</span>
+                - {{ 70 }}% - Not Set - S
+              </span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="70"></div>
+            </div>
+          </div>
+          
+          <!-- Status Text -->
+          <p class="status-text">Focus Area Not Identified</p>
+        </div>
+        
+        <!-- Card Footer -->
+        <div class="card-footer">
+          <span class="timestamp">{{ getTimeSince(project.updatedDate) }}</span>
+          <div class="footer-actions">
+            <a [routerLink]="['/projects', project.id, 'edit']" class="btn-link">Edit</a>
+            <button (click)="deleteProject(project.id)" class="btn-link danger">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
