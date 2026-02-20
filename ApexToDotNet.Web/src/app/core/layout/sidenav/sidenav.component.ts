@@ -107,14 +107,14 @@ interface NavItem {
 export class SidenavComponent implements OnInit {
   navItems: NavItem[] = [
     { path: '/home', label: 'Home', icon: '🏠' },
-    { path: '/projects', label: 'Projects', icon: '📋', badge: 0 },
     { path: '/areas', label: 'Areas', icon: '🎯', badge: 0 },
     { path: '/initiatives', label: 'Initiatives', icon: '🚀', badge: 0 },
-    { path: '/activities', label: 'Activities', icon: '⚡', badge: 0 },
-    { path: '/people', label: 'People', icon: '👥', badge: 0 },
+    { path: '/projects', label: 'Projects', icon: '�', badge: 0 },
     { path: '/project-groups', label: 'Project Groups', icon: '📁', badge: 0 },
-    { path: '/person-groups', label: 'Person Groups', icon: '👨‍👩‍👧‍👦', badge: 0 },
+    { path: '/activities', label: 'Activities', icon: '⚡', badge: 0 },
     { path: '/releases', label: 'Releases', icon: '🎉', badge: 0 },
+    { path: '/people', label: 'People', icon: '�', badge: 0 },
+    { path: '/person-groups', label: 'Person Groups', icon: '👨‍👩‍👧‍👦', badge: 0 },
     { path: '/reports', label: 'Reports', icon: '📊' }
   ];
 
