@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { StrategicPlannerService } from '../../services/strategic-planner.service';
 import { Project } from '../../models/strategic-planner.models';
 
@@ -22,36 +23,58 @@ interface RecentActivity {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="home-container">
       <div class="welcome-section">
-        <h1>Welcome to Strategic Planner</h1>
-        <p class="subtitle">Track projects, initiatives, and deliverables</p>
+        <h1>Our Strategic Planner</h1>
       </div>
 
-      <!-- Quick Stats Dashboard -->
-      <div class="dashboard-grid">
-        <div 
-          *ngFor="let section of dashboardSections" 
-          class="stat-card"
-          [style.border-left-color]="section.color"
-          [routerLink]="section.route">
-          <div class="stat-icon" [style.background]="section.color + '20'">
-            <span [style.color]="section.color">{{ section.icon }}</span>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ section.count }}</div>
-            <div class="stat-label">{{ section.title }}</div>
+      <!-- Search Bar -->
+      <div class="search-section">
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search Projects"
+            [(ngModel)]="searchQuery"
+            (input)="onSearch()">
+        </div>
+      </div>
+
+      <!-- My Initiatives -->
+      <div class="section">
+        <div class="section-header">
+          <h2>My Initiatives</h2>
+        </div>
+        <div class="content-area">
+          <div *ngIf="myInitiatives.length === 0" class="empty-state-inline">
+            <span class="empty-icon-small">🔍</span>
+            <p>No data found</p>
           </div>
         </div>
       </div>
 
-      <!-- Recent Projects -->
+      <!-- My Open Releases -->
       <div class="section">
         <div class="section-header">
-          <h2>Recent Projects</h2>
-          <a [routerLink]="['/projects']" class="view-all-link">View All →</a>
+          <h2>My Open Releases</h2>
+          <button class="expand-btn">›</button>
+        </div>
+        <div class="content-area">
+          <div *ngIf="myOpenReleases.length === 0" class="empty-state-inline">
+            <span class="empty-icon-small">🔍</span>
+            <p>No data found</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recently Changed Projects -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Recently Changed Projects</h2>
+          <button class="expand-btn">›</button>
         </div>
         <div class="projects-grid">
           <div *ngFor="let project of recentProjects" class="project-card">
@@ -88,7 +111,7 @@ interface RecentActivity {
 
           <div *ngIf="recentProjects.length === 0" class="empty-state">
             <span class="empty-icon">📋</span>
-            <p>No recent projects</p>
+            <p>No recently changed projects</p>
             <button class="btn-primary" [routerLink]="['/projects']">
               Browse Projects
             </button>
@@ -134,67 +157,40 @@ interface RecentActivity {
       font-size: 32px;
       font-weight: 600;
       color: #212121;
-      margin: 0 0 8px 0;
-    }
-
-    .subtitle {
-      font-size: 16px;
-      color: #757575;
       margin: 0;
     }
 
-    /* Dashboard Stats Grid */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-bottom: 40px;
+    /* Search Section */
+    .search-section {
+      margin-bottom: 32px;
     }
 
-    .stat-card {
-      background: white;
-      border-radius: 8px;
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      border-left: 4px solid;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    .search-wrapper {
+      position: relative;
+      max-width: 100%;
     }
 
-    .stat-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transform: translateY(-2px);
-    }
-
-    .stat-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-    }
-
-    .stat-content {
-      flex: 1;
-    }
-
-    .stat-value {
-      font-size: 32px;
-      font-weight: 700;
-      color: #212121;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
-      font-size: 14px;
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
       color: #757575;
-      font-weight: 500;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      background: white;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #1976d2;
     }
 
     /* Sections */
@@ -213,6 +209,53 @@ interface RecentActivity {
       font-size: 24px;
       font-weight: 600;
       color: #212121;
+      margin: 0;
+    }
+
+    .expand-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #757575;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .expand-btn:hover {
+      color: #212121;
+    }
+
+    /* Content Area */
+    .content-area {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-state-inline {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .empty-icon-small {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 12px;
+      opacity: 0.3;
+    }
+
+    .empty-state-inline p {
+      font-size: 14px;
+      color: #757575;
       margin: 0;
     }
 
@@ -426,10 +469,6 @@ interface RecentActivity {
     }
 
     @media (max-width: 768px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-
       .projects-grid {
         grid-template-columns: 1fr;
       }
@@ -441,15 +480,9 @@ interface RecentActivity {
   `]
 })
 export class HomeComponent implements OnInit {
-  dashboardSections: DashboardSection[] = [
-    { title: 'Projects', count: 0, route: '/projects', icon: '📋', color: '#1976d2' },
-    { title: 'Areas', count: 0, route: '/areas', icon: '🎯', color: '#7cb342' },
-    { title: 'Initiatives', count: 0, route: '/initiatives', icon: '🚀', color: '#f57c00' },
-    { title: 'Activities', count: 0, route: '/activities', icon: '⚡', color: '#d32f2f' },
-    { title: 'People', count: 0, route: '/people', icon: '👥', color: '#9c27b0' },
-    { title: 'Reports', count: 0, route: '/reports', icon: '📊', color: '#00897b' }
-  ];
-
+  searchQuery: string = '';
+  myInitiatives: any[] = [];
+  myOpenReleases: any[] = [];
   recentProjects: Project[] = [];
   recentActivity: RecentActivity[] = [];
 
@@ -459,20 +492,12 @@ export class HomeComponent implements OnInit {
     this.loadDashboardData();
   }
 
-  loadDashboardData() {
-    // Load navigation counts
-    this.plannerService.getNavigationCounts().subscribe({
-      next: (counts) => {
-        this.dashboardSections[0].count = counts.projects || 0;
-        this.dashboardSections[1].count = counts.areas || 0;
-        this.dashboardSections[2].count = counts.initiatives || 0;
-        this.dashboardSections[3].count = counts.activities || 0;
-        this.dashboardSections[4].count = counts.people || 0;
-      },
-      error: (error) => console.error('Error loading counts:', error)
-    });
+  onSearch() {
+    // Implement search functionality
+    console.log('Search query:', this.searchQuery);
+  }
 
-    // Load recent projects
+  loadDashboardData() {
     this.plannerService.searchProjects('', { limit: 6 }).subscribe({
       next: (projects) => {
         this.recentProjects = projects;
