@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
             <path d="M3 12h18M3 6h18M3 18h18" stroke-width="2" stroke-linecap="round"/>
           </svg>
         </button>
-        <h1 class="app-title">Strategic Planner</h1>
+        <h1 class="app-title">Our Strategic Planner</h1>
       </div>
       <div class="header-right">
         <span class="username">APEXDOTNET</span>
