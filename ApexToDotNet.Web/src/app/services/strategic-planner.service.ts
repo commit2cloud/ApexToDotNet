@@ -2,8 +2,10 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { ProjectService } from './project.service';
 import {
   Project,
   Initiative,
@@ -21,11 +23,14 @@ import {
 export class StrategicPlannerService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private projectService: ProjectService
+  ) {}
 
-  // Projects
+  // Projects - use ProjectService which has mock fallback
   getProjects(): Observable<Project[]> {
-    return this.http.get<Project[]>(`${this.apiUrl}/projects`);
+    return this.projectService.getProjects();
   }
 
   getProject(id: number): Observable<Project> {
@@ -98,6 +103,32 @@ export class StrategicPlannerService {
 
   // Navigation counts (for badges)
   getNavigationCounts(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/dashboard/counts`);
+    // Try API first, fallback to calculating from actual data
+    return this.http.get<any>(`${this.apiUrl}/dashboard/counts`).pipe(
+      catchError(() => {
+        // If API fails, calculate counts from the actual endpoints
+        return forkJoin({
+          projects: this.getProjects().pipe(catchError(() => of([]))),
+          areas: this.getAreas().pipe(catchError(() => of([]))),
+          initiatives: this.getInitiatives().pipe(catchError(() => of([]))),
+          activities: this.getActivities().pipe(catchError(() => of([]))),
+          people: this.getPeople().pipe(catchError(() => of([]))),
+          projectGroups: this.getProjectGroups().pipe(catchError(() => of([]))),
+          personGroups: this.getPeopleGroups().pipe(catchError(() => of([]))),
+          releases: this.getReleases().pipe(catchError(() => of([])))
+        }).pipe(
+          map(data => ({
+            projects: data.projects.length,
+            areas: data.areas.length,
+            initiatives: data.initiatives.length,
+            activities: data.activities.length,
+            people: data.people.length,
+            projectGroups: data.projectGroups.length,
+            personGroups: data.personGroups.length,
+            releases: data.releases.length
+          }))
+        );
+      })
+    );
   }
 }

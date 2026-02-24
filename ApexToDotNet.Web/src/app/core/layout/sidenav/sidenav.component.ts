@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { StrategicPlannerService } from '../../../services/strategic-planner.service';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 interface NavItem {
   path: string;
@@ -24,7 +26,7 @@ interface NavItem {
           class="nav-item">
           <span class="nav-icon">{{ item.icon }}</span>
           <span class="nav-label">{{ item.label }}</span>
-          <span *ngIf="item.badge" class="nav-badge">{{ item.badge }}</span>
+          <span *ngIf="item.badge !== undefined" class="nav-badge">{{ item.badge }}</span>
         </a>
       </div>
     </nav>
@@ -104,19 +106,21 @@ interface NavItem {
     }
   `]
 })
-export class SidenavComponent implements OnInit {
+export class SidenavComponent implements OnInit, OnDestroy {
   navItems: NavItem[] = [
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/areas', label: 'Areas', icon: '🎯', badge: 0 },
     { path: '/initiatives', label: 'Initiatives', icon: '🚀', badge: 0 },
-    { path: '/projects', label: 'Projects', icon: '�', badge: 0 },
+    { path: '/projects', label: 'Projects', icon: '📋', badge: 0 },
     { path: '/project-groups', label: 'Project Groups', icon: '📁', badge: 0 },
     { path: '/activities', label: 'Activities', icon: '⚡', badge: 0 },
     { path: '/releases', label: 'Releases', icon: '🎉', badge: 0 },
-    { path: '/people', label: 'People', icon: '�', badge: 0 },
+    { path: '/people', label: 'People', icon: '👥', badge: 0 },
     { path: '/person-groups', label: 'Person Groups', icon: '👨‍👩‍👧‍👦', badge: 0 },
     { path: '/reports', label: 'Reports', icon: '📊' }
   ];
+
+  private routerSubscription?: Subscription;
 
   constructor(
     private router: Router,
@@ -125,6 +129,17 @@ export class SidenavComponent implements OnInit {
 
   ngOnInit() {
     this.loadNavigationCounts();
+    
+    // Refresh counts after navigation (when user creates/edits/deletes items)
+    this.routerSubscription = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.loadNavigationCounts();
+    });
+  }
+
+  ngOnDestroy() {
+    this.routerSubscription?.unsubscribe();
   }
 
   loadNavigationCounts() {
