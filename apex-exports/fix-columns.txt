@@ -1,0 +1,69 @@
+
+
+
+SQLcl: Release 25.4 Production on Mon Mar 02 09:47:25 2026
+
+Copyright (c) 1982, 2026, Oracle.  All rights reserved.
+
+Last Successful login time: Mon Mar 02 2026 09:47:27 -06:00
+
+Connected to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.30.0.1.0
+
+
+[1mCOLUMN_NAME[m                    
+______________________________ 
+DISPLAY_ITEM_POSITION          
+DISPLAY_ITEM_POSITION_CODE     
+DISPLAY_POSITION               
+DISPLAY_POSITION_CODE          
+PAGINATION_DISPLAY_POSITION    
+
+
+[1mCOLUMN_NAME[m           
+_____________________ 
+EXECUTION_SEQUENCE    
+
+
+[1mCOLUMN_NAME[m               
+_________________________ 
+ERROR_DISPLAY_LOCATION    
+
+
+[1mCOLUMN_NAME[m                    
+______________________________ 
+WHEN_EVENT_CUSTOM_NAME         
+WHEN_EVENT_INTERNAL_NAME       
+WHEN_EVENT_NAME                
+WHEN_EVENT_SCOPE               
+WHEN_EVENT_STATIC_CONTAINER    
+
+
+[1mCOLUMN_NAME[m                
+__________________________ 
+DYNAMIC_ACTION_SEQUENCE    
+
+
+[1mCOLUMN_NAME[m                    
+______________________________ 
+AFTER_BREAK_DISPLAY_TEXT       
+BEFORE_BREAK_DISPLAY_TEXT      
+BREAK_COLUMN_DISPLAY_TEXT      
+BREAK_DISPLAY_FLAG             
+BREAK_DISPLAY_TEXT             
+DISPLAY_COLUMN                 
+DISPLAY_ITEM_POSITION          
+DISPLAY_ITEM_POSITION_CODE     
+DISPLAY_POSITION               
+DISPLAY_POSITION_CODE          
+DISPLAY_REGION_SELECTOR        
+DISPLAY_SEQUENCE               
+PAGINATION_DISPLAY_POSITION    
+SUM_DISPLAY_TEXT               
+WORKSPACE_DISPLAY_NAME         
+
+15 rows selected. 
+
+Disconnected from Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.30.0.1.0

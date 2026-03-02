@@ -1,0 +1,1370 @@
+
+
+
+SQLcl: Release 25.4 Production on Mon Mar 02 09:49:41 2026
+
+Copyright (c) 1982, 2026, Oracle.  All rights reserved.
+
+Last Successful login time: Mon Mar 02 2026 09:49:42 -06:00
+
+Connected to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.30.0.1.0
+
+=== 7-FIX2. VALIDATIONS ===
+
+   [1mPAGE_ID[m [1mVALIDATION_NAME[m                                          [1mVALIDATION_TYPE[m                                                           [1mEXPRESSION1[m                                                               [1mERROR_DISPLAY_LOCATION[m                [1mASSOCIATED_ITEM[m                   
+__________ ________________________________________________________ _________________________________________________________________________ _________________________________________________________________________ _____________________________________ _________________________________ 
+        20 email valid                                              Item\Column in Expression 1 matches Regular Expression in Expression 2    P20_EMAIL                                                                 INLINE_WITH_FIELD_AND_NOTIFICATION    P20_EMAIL                         
+        20 no dup screen names                                      NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION    P20_SCREEN_NAME                   
+                                                                                                                                                from sp_team_members                                                                                                                            
+                                                                                                                                               where id != :P20_ID                                                                                                                              
+                                                                                                                                                 and screen_name = lower(:P20_SCREEN_NAME)                                                                                                      
+        20 screen name, no #,., @ or space                          Expression                                                                instr(:P20_SCREEN_NAME,'#') = 0 and                                       INLINE_WITH_FIELD_AND_NOTIFICATION    P20_SCREEN_NAME                   
+                                                                                                                                              instr(:P20_SCREEN_NAME,'@') = 0 and                                                                                                               
+                                                                                                                                              instr(:P20_SCREEN_NAME,'.') = 0 and                                                                                                               
+                                                                                                                                              instr(:P20_SCREEN_NAME,' ') = 0                                                                                                                   
+        22 Can't delete if projects                                 NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                                from sp_projects                                                                                                                                
+                                                                                                                                               where initiative_id = :P22_ID                                                                                                                    
+        24 Link                                                     Expression                                                                (:P24_LINK is not null and :P24_LINK_NAME is not null) or                 INLINE_WITH_FIELD_AND_NOTIFICATION    P24_LINK                          
+                                                                                                                                              (:P24_LINK is null and :P24_LINK_NAME is null)                                                                                                    
+        24 target_complete mandatory when >=50% complete            Item\Column specified is NOT NULL                                         P24_TARGET_COMPLETE                                                       INLINE_WITH_FIELD_AND_NOTIFICATION    P24_TARGET_COMPLETE               
+        27 Cannot close if never opened                             Expression                                                                (nvl(:P27_RELEASE_OPEN_COMPLETED,'N') = 'N' and                           INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                               nvl(:P27_RELEASE_COMPLETED,'N') = 'N')                                                                                                           
+                                                                                                                                              or                                                                                                                                                
+                                                                                                                                              nvl(:P27_RELEASE_OPEN_COMPLETED,'N') = 'Y'                                                                                                        
+       104 Initiative must be specified                             Item\Column specified is NOT NULL                                         P104_INITIATIVE                                                           INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+       125 must have comments to reject or request more info        Item\Column specified is NOT NULL                                         P125_COMMENTS                                                             INLINE_WITH_FIELD_AND_NOTIFICATION    P125_COMMENTS                     
+       126 must have comments                                       Item\Column specified is NOT NULL                                         P126_COMMENTS                                                             INLINE_WITH_FIELD_AND_NOTIFICATION    P126_COMMENTS                     
+       144 no dup screen names                                      NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION    P144_SCREEN_NAME                  
+                                                                                                                                                from sp_team_members                                                                                                                            
+                                                                                                                                               where id != :P144_ID                                                                                                                             
+                                                                                                                                                 and screen_name = lower(:P144_SCREEN_NAME)                                                                                                     
+       144 screen name, no #,., @ or space                          Expression                                                                instr(:P144_SCREEN_NAME,'#') = 0 and                                      INLINE_WITH_FIELD_AND_NOTIFICATION    P144_SCREEN_NAME                  
+                                                                                                                                              instr(:P144_SCREEN_NAME,'@') = 0 and                                                                                                              
+                                                                                                                                              instr(:P144_SCREEN_NAME,'.') = 0 and                                                                                                              
+                                                                                                                                              instr(:P144_SCREEN_NAME,' ') = 0                                                                                                                  
+       170 unique                                                   NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION    P170_INITIATIVE                   
+                                                                                                                                                from sp_initiatives                                                                                                                             
+                                                                                                                                               where lower(initiative) = lower(:P170_INITIATIVE)                                                                                                
+                                                                                                                                                 and area_id = :P170_FOCUS_AREA_ID                                                                                                              
+       501 when task complete, must provide date                    Item\Column specified is NOT NULL                                         P501_TARGET_COMPLETE                                                      INLINE_WITH_FIELD_AND_NOTIFICATION    P501_TARGET_COMPLETE              
+       501 if task name is required                                 Function Returning Boolean                                                if :P501_TASK is null then                                                INLINE_WITH_FIELD_AND_NOTIFICATION    P501_TASK                         
+                                                                                                                                                  for c1 in (                                                                                                                                   
+                                                                                                                                                      select 1 from sp_task_types                                                                                                               
+                                                                                                                                                       where nvl(:P501_TASK_SUB_TYPE_ID,:P501_TASK_TYPE_ID) = id                                                                                
+                                                                                                                                                         and task_name_req_yn = 'Y' )                                                                                                           
+                                                                                                                                                  loop                                                                                                                                          
+                                                                                                                                                      return FALSE;                                                                                                                             
+                                                                                                                                                  end loop;                                                                                                                                     
+                                                                                                                                              end if;                                                                                                                                           
+                                                                                                                                                                                                                                                                                                
+                                                                                                                                              return TRUE;                                                                                                                                      
+       508 when milestone complete, must provide date               Item\Column specified is NOT NULL                                         P508_TARGET_COMPLETE                                                      INLINE_WITH_FIELD_AND_NOTIFICATION    P508_TARGET_COMPLETE              
+       508 when milestone complete, must provide owner              Item\Column specified is NOT NULL                                         P508_OWNER_ID                                                             INLINE_WITH_FIELD_AND_NOTIFICATION    P508_OWNER_ID                     
+       509 when review complete, must provide date                  Item\Column specified is NOT NULL                                         P509_TARGET_COMPLETE                                                      INLINE_WITH_FIELD_AND_NOTIFICATION    P509_TARGET_COMPLETE              
+       509 when review complete, must provide owner                 Item\Column specified is NOT NULL                                         P509_OWNER_ID                                                             INLINE_WITH_FIELD_AND_NOTIFICATION    P509_OWNER_ID                     
+      4011 check approval type unique                               NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION    P4011_APPROVAL_TYPE               
+                                                                                                                                                from SP_APPROVAL_TYPES                                                                                                                          
+                                                                                                                                               where lower(approval_type) = lower(:P4011_APPROVAL_TYPE)                                                                                         
+                                                                                                                                                 and (:P4011_ID is null or :P4011_ID != id)                                                                                                     
+      4013 no dups                                                  NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                                from sp_initiative_approvals                                                                                                                    
+                                                                                                                                               where initiative_id = :P4013_INITIATIVE_ID                                                                                                       
+                                                                                                                                                 and approval_type_id = :P4013_APPROVAL_TYPE_ID                                                                                                 
+                                                                                                                                                 and (:P4013_ID is null or :P4013_ID != id)                                                                                                     
+      4015 no dups                                                  NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                                from sp_initiative_approval_chain                                                                                                               
+                                                                                                                                               where initiative_approval_id = :P4015_INITIATIVE_APPROVAL_ID                                                                                     
+                                                                                                                                                 and team_member_id = :P4015_TEAM_MEMBER_ID                                                                                                     
+                                                                                                                                                 and (:P4015_ID is null or :P4015_ID != id)                                                                                                     
+      4015 no dup approval seq                                      NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION    P4015_APPROVAL_SEQ                
+                                                                                                                                                from sp_initiative_approval_chain                                                                                                               
+                                                                                                                                               where initiative_approval_id = :P4015_INITIATIVE_APPROVAL_ID                                                                                     
+                                                                                                                                                 and approval_seq = :P4015_APPROVAL_SEQ                                                                                                         
+                                                                                                                                                 and (:P4015_ID is null or :P4015_ID != id)                                                                                                     
+      4015 cannot delete with active approvals                      NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                                from sp_project_approval_chain                                                                                                                  
+                                                                                                                                               where team_member_id = :P4015_TEAM_MEMBER_ID                                                                                                     
+      4015 cannot delete only approver (if type is active)          Exists                                                                    select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                                from sp_initiative_approvals a,                                                                                                                 
+                                                                                                                                                     sp_initiative_approval_chain c                                                                                                             
+                                                                                                                                               where a.id = c.initiative_approval_id                                                                                                            
+                                                                                                                                                 and a.active_yn = 'Y'                                                                                                                          
+                                                                                                                                                 and c.active_yn = 'Y'                                                                                                                          
+                                                                                                                                                 and c.id != :P4015_ID                                                                                                                          
+                                                                                                                                                 and c.initiative_approval_id = :P4015_INITIATIVE_APPROVAL_ID                                                                                   
+      4015 cannot inactivate only approver (if type is active)_1    Exists                                                                    select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                                from sp_initiative_approvals a,                                                                                                                 
+                                                                                                                                                     sp_initiative_approval_chain c                                                                                                             
+                                                                                                                                               where a.id = c.initiative_approval_id                                                                                                            
+                                                                                                                                                 and a.active_yn = 'Y'                                                                                                                          
+                                                                                                                                                 and c.active_yn = 'Y'                                                                                                                          
+                                                                                                                                                 and c.id != :P4015_ID                                                                                                                          
+                                                                                                                                                 and c.initiative_approval_id = :P4015_INITIATIVE_APPROVAL_ID                                                                                   
+      4015 alt end >= alt start                                     Expression                                                                :P4015_ALTERNATE_END_DATE >= :P4015_ALTERNATE_START_DATE                  INLINE_WITH_FIELD_AND_NOTIFICATION    P4015_ALTERNATE_END_DATE          
+      4015 Alternate cannot be in approval chain                    NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION    P4015_ALTERNATE_TEAM_MEMBER_ID    
+                                                                                                                                                from sp_initiative_approval_chain                                                                                                               
+                                                                                                                                               where initiative_approval_id = :P4015_INITIATIVE_APPROVAL_ID                                                                                     
+                                                                                                                                                 and team_member_id = :P4015_ALTERNATE_TEAM_MEMBER_ID                                                                                           
+                                                                                                                                                 and active_yn = 'Y'                                                                                                                            
+      4015 Alternate cannot already be alternate                    NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION    P4015_ALTERNATE_TEAM_MEMBER_ID    
+                                                                                                                                                from sp_initiative_approval_chain                                                                                                               
+                                                                                                                                               where initiative_approval_id = :P4015_INITIATIVE_APPROVAL_ID                                                                                     
+                                                                                                                                                 and alternate_team_member_id = :P4015_ALTERNATE_TEAM_MEMBER_ID                                                                                 
+                                                                                                                                                 and active_yn = 'Y'                                                                                                                            
+                                                                                                                                                 and id != :P4015_ID                                                                                                                            
+      4016 no dups                                                  NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                                from sp_initiative_approval_chain                                                                                                               
+                                                                                                                                               where initiative_approval_id = :P4016_INITIATIVE_APPROVAL_ID                                                                                     
+                                                                                                                                                 and team_member_id = :P4016_TEAM_MEMBER_ID                                                                                                     
+      4016 no dup approval seq                                      NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                                from sp_initiative_approval_chain                                                                                                               
+                                                                                                                                               where initiative_approval_id = :P4016_INITIATIVE_APPROVAL_ID                                                                                     
+                                                                                                                                                 and approval_seq = :P4016_APPROVAL_SEQ                                                                                                         
+     10012 Cannot remove yourself from administrator                Function Returning Boolean                                                if :P10012_USER_NAME = :APP_USER and                                      INLINE_IN_NOTIFICATION                                                  
+                                                                                                                                                  apex_acl.is_role_removed_from_user (                                                                                                          
+                                                                                                                                                      p_application_id => :APP_ID,                                                                                                              
+                                                                                                                                                      p_user_name      => :APP_USER,                                                                                                            
+                                                                                                                                                      p_role_static_id => 'ADMINISTRATOR',                                                                                                      
+                                                                                                                                                      p_role_ids       => apex_string.split_numbers(                                                                                            
+                                                                                                                                                                              p_str => case                                                                                                     
+     10012 email valid                                              Item\Column in Expression 1 matches Regular Expression in Expression 2    P10012_USER_NAME                                                          INLINE_WITH_FIELD_AND_NOTIFICATION    P10012_USER_NAME                  
+     10062 static id no spaces                                      Expression                                                                instr(:P10062_STATIC_ID,' ') = 0                                          INLINE_WITH_FIELD_AND_NOTIFICATION    P10062_STATIC_ID                  
+     10062 no delete if used                                        NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                                from sp_tasks                                                                                                                                   
+                                                                                                                                               where status_id = :P10062_ID                                                                                                                     
+     10062 only one default per task type                           NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION    P10062_IS_DEFAULT_YN              
+                                                                                                                                                from sp_task_statuses                                                                                                                           
+                                                                                                                                               where task_type_id = :P10062_TASK_TYPE_ID                                                                                                        
+                                                                                                                                                 and is_default_yn = 'Y'                                                                                                                        
+                                                                                                                                                 and (id != :P10062_ID or :P10062_ID is null)                                                                                                   
+     10065 Cannot change parent if refs                             NOT Exists                                                                select 1 from sp_tasks                                                    INLINE_WITH_FIELD_AND_NOTIFICATION    P10065_PARENT_TYPE_ID             
+                                                                                                                                               where task_sub_type_id = :P10065_ID                                                                                                              
+     10065 static id no spaces                                      Expression                                                                instr(:P10065_STATIC_ID,' ') = 0                                          INLINE_WITH_FIELD_AND_NOTIFICATION    P10065_STATIC_ID                  
+     10101 prevent delete of existing                               NOT Exists                                                                select 1 from sp_projects where project_size =:P10101_PROJECT_SIZE        INLINE_IN_NOTIFICATION                                                  
+     10111 static id no spaces                                      Expression                                                                instr(:P10111_STATIC_ID,' ') = 0                                          INLINE_WITH_FIELD_AND_NOTIFICATION    P10111_STATIC_ID                  
+     10111 no delete if used                                        NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                                from sp_projects                                                                                                                                
+                                                                                                                                               where status_id = :P10111_ID                                                                                                                     
+     10151 prevent delete of existing                               NOT Exists                                                                select 1 from sp_projects where focus_area_id = :P10151_ID                INLINE_IN_NOTIFICATION                                                  
+     10151 dups                                                     NOT Exists                                                                select 1                                                                  INLINE_WITH_FIELD_AND_NOTIFICATION    P10151_FOCUS_AREA                 
+                                                                                                                                                from sp_initiative_focus_areas                                                                                                                  
+                                                                                                                                               where initiative_id = :P10151_INITIATIVE_ID                                                                                                      
+                                                                                                                                                 and lower(focus_area) = lower(:P10151_FOCUS_AREA)                                                                                              
+                                                                                                                                                 and (:P10151_ID is null or id != :P10151_ID)                                                                                                   
+     10210 all pct complete labels provided                         Expression                                                                :P10210_PC0_LABEL is not null and                                         INLINE_WITH_FIELD_AND_NOTIFICATION                                      
+                                                                                                                                              :P10210_PC10_LABEL is not null and                                                                                                                
+                                                                                                                                              :P10210_PC20_LABEL is not null and                                                                                                                
+                                                                                                                                              :P10210_PC30_LABEL is not null and                                                                                                                
+                                                                                                                                              :P10210_PC40_LABEL is not null and                                                                                                                
+                                                                                                                                              :P10210_PC50_LABEL is not null and                                                                                                                
+                                                                                                                                              :P10210_PC60_LABEL is not null and                                                                                                                
+                                                                                                                                              :P10210_PC70_LABEL is not null and                                                                                                                
+                                                                                                                                              :P10210_PC80_LABEL is                                                                                                                             
+     12120 At least One Feedback Required                           Function Returning Boolean                                                if :P12120_FEEDBACK is null and :P12120_RATING is null then               INLINE_IN_NOTIFICATION                                                  
+                                                                                                                                                  return false;                                                                                                                                 
+                                                                                                                                              else                                                                                                                                              
+                                                                                                                                                  return true;                                                                                                                                  
+                                                                                                                                              end if;                                                                                                                                           
+     12140 link must have #EMAIL#                                   Expression                                                                instr(:P12140_EXTERNAL_PERSON_LINK,'#EMAIL#') > 0                         INLINE_WITH_FIELD_AND_NOTIFICATION    P12140_EXTERNAL_PERSON_LINK       
+     12140 domain not contains @                                    Expression                                                                (:P12140_EXT_PERSON_LINK_DOMAIN is not null and                           INLINE_WITH_FIELD_AND_NOTIFICATION    P12140_EXT_PERSON_LINK_DOMAIN     
+                                                                                                                                               :P12140_EXTERNAL_PERSON_LINK is not null)                                                                                                        
+                                                                                                                                              or                                                                                                                                                
+                                                                                                                                              (:P12140_EXT_PERSON_LINK_DOMAIN is null and                                                                                                       
+                                                                                                                                               :P12140_EXTERNAL_PERSON_LINK is null)                                                                                                            
+     12140 Must have both (or neither)                              Expression                                                                (:P12140_EXT_PERSON_LINK_DOMAIN is not null and                           INLINE_IN_NOTIFICATION                                                  
+                                                                                                                                               :P12140_EXTERNAL_PERSON_LINK is not null)                                                                                                        
+                                                                                                                                              or                                                                                                                                                
+                                                                                                                                              (:P12140_EXT_PERSON_LINK_DOMAIN is null and                                                                                                       
+                                                                                                                                               :P12140_EXTERNAL_PERSON_LINK is null)                                                                                                            
+     16016 when release                                             Item\Column specified is NOT NULL                                         P16016_RELEASE_ID                                                         INLINE_WITH_FIELD_AND_NOTIFICATION    P16016_RELEASE_ID                 
+     16016 check for dups                                           NOT Exists                                                                select 1                                                                  INLINE_IN_NOTIFICATION                                                  
+                                                                                                                                                from sp_notification_subscriptions                                                                                                              
+                                                                                                                                               where notification_id = :P16016_NOTIFICATION_ID                                                                                                  
+                                                                                                                                                 and team_member_id = :P16016_TEAM_MEMBER_ID                                                                                                    
+                                                                                                                                                 and (release_id = :P16016_RELEASE_ID or :P16016_RELEASE_ID is null)                                                                            
+                                                                                                                                                 and opted_in_yn = 'Y'                                                                                                                          
+
+50 rows selected. 
+
+=== 10-FIX. LOVS COLUMNS ===
+
+[1mCOLUMN_NAME[m                    
+______________________________ 
+APPLICATION_ID                 
+APPLICATION_NAME               
+ARRAY_COLUMN_ID                
+ARRAY_COLUMN_NAME              
+CACHE_INVALIDATION_EXPR        
+CACHE_MODE                     
+COLUMNS_CLAUSE                 
+COMPONENT_COMMENT              
+COMPONENT_SIGNATURE            
+DEFAULT_SORT_COLUMN_NAME       
+DEFAULT_SORT_DIRECTION         
+DEFAULT_SORT_DIRECTION_CODE    
+DISPLAY_COLUMN_NAME            
+DUALITY_VIEW_ID                
+DUALITY_VIEW_NAME              
+EXTERNAL_FILTER_EXPR           
+EXTERNAL_ORDER_BY_EXPR         
+FUNCTION_BODY_LANGUAGE         
+GROUP_COLUMN_NAME              
+GROUP_SORT_DIRECTION           
+GROUP_SORT_DIRECTION_CODE      
+ICON_COLUMN_NAME               
+IS_SUBSCRIBED                  
+JSON_SOURCE_ID                 
+JSON_SOURCE_NAME               
+LAST_UPDATED_BY                
+LAST_UPDATED_ON                
+LIST_OF_VALUES_NAME            
+LIST_OF_VALUES_QUERY           
+LOCATION                       
+LOCATION_CODE                  
+LOV_ENTRIES                    
+LOV_ID                         
+LOV_TYPE                       
+MATCH_CLAUSE                   
+OPTIMIZER_HINT                 
+ORACLE_TEXT_COLUMN_NAME        
+REFERENCED_LOV_ID              
+REMOTE_DATABASE_ID             
+REMOTE_DATABASE_NAME           
+RETURN_COLUMN_NAME             
+SOURCE_POST_PROCESSING         
+SOURCE_TYPE                    
+SOURCE_TYPE_CODE               
+SUBSCRIBED_FROM                
+SUBSCRIPTION_NEEDS_REFRESH     
+TABLE_NAME                     
+TABLE_OWNER                    
+USE_LOCAL_SYNC_TABLE           
+WEB_SOURCE_MODULE_ID           
+WEB_SOURCE_MODULE_NAME         
+WHERE_CLAUSE                   
+WORKING_COPY_NAME              
+WORKSPACE                      
+WORKSPACE_DISPLAY_NAME         
+
+55 rows selected. 
+
+=== 10-FIX2. LOV DATA ===
+
+Error starting at line : 14 in command -
+SELECT lov_name, lov_type FROM apex_application_lovs WHERE application_id = 102 ORDER BY lov_name
+Error at Command Line : 14 Column : 8
+Error report -
+SQL Error: ORA-00904: "LOV_NAME": invalid identifier
+
+https://docs.oracle.com/error-help/db/ora-00904/00904. 00000 -  "%s: invalid identifier"
+*Cause:    The identifier or column name entered was invalid.
+*Action:   Ensure the following
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-00904/
+=== VIEWS AND PACKAGES ===
+
+[1mVIEW_NAME[m                        
+________________________________ 
+SP_DOCUMENTS_V                   
+SP_INITIATIVE_COMMENTS_V         
+SP_INIT_FOCUS_AREA_COMMENTS_V    
+SP_PROJECT_COMMENTS_V            
+SP_RELEASE_COMMENTS_V            
+SP_TASK_COMMENTS_V               
+
+6 rows selected. 
+
+=== SCHEMA ALL OBJECTS ===
+
+[1mOBJECT_NAME[m                              [1mOBJECT_TYPE[m     [1mSTATUS[m    
+________________________________________ _______________ _________ 
+SP_DATE_RANGE_PCT_COMP                   FUNCTION        VALID     
+SP_TAG_DIFF                              FUNCTION        VALID     
+SP_APPROVALS                             PACKAGE         VALID     
+SP_COMMENT_UTIL                          PACKAGE         VALID     
+SP_CONTRIBUTOR_SUMMARY                   PACKAGE         VALID     
+SP_GLOBALS                               PACKAGE         VALID     
+SP_LOG                                   PACKAGE         VALID     
+SP_RELEASE_TIMELINE                      PACKAGE         VALID     
+SP_SUMMARY_UTIL                          PACKAGE         VALID     
+SP_UTIL                                  PACKAGE         VALID     
+SP_VALUE_COMPARE                         PACKAGE         VALID     
+SP_APPROVALS                             PACKAGE BODY    VALID     
+SP_COMMENT_UTIL                          PACKAGE BODY    VALID     
+SP_CONTRIBUTOR_SUMMARY                   PACKAGE BODY    VALID     
+SP_LOG                                   PACKAGE BODY    VALID     
+SP_RELEASE_TIMELINE                      PACKAGE BODY    VALID     
+SP_SUMMARY_UTIL                          PACKAGE BODY    VALID     
+SP_UTIL                                  PACKAGE BODY    VALID     
+SP_VALUE_COMPARE                         PACKAGE BODY    VALID     
+SP_FAVORITE_TOGGLE                       PROCEDURE       VALID     
+SP_ACTIVITIES_BIU                        TRIGGER         VALID     
+SP_ACTIVITY_TYPES_BD                     TRIGGER         VALID     
+SP_ACTIVITY_TYPES_BIU                    TRIGGER         VALID     
+SP_AI_PROMPTS_BIU                        TRIGGER         VALID     
+SP_APPLICATION_NOTIFICATIONS_BIU         TRIGGER         VALID     
+SP_APPROVAL_TYPES_BIU                    TRIGGER         VALID     
+SP_APP_LOG_BI                            TRIGGER         VALID     
+SP_APP_NOMENCLATURE_BIU                  TRIGGER         VALID     
+SP_APP_SETTINGS_BIU                      TRIGGER         VALID     
+SP_AREAS_BIU                             TRIGGER         VALID     
+SP_COMPETENCIES_BIU                      TRIGGER         VALID     
+SP_CONFIGURABLE_TEXT_BIU                 TRIGGER         VALID     
+SP_COUNTRIES_BIU                         TRIGGER         VALID     
+SP_DEFAULT_PEOPLE_TAGS_BIU               TRIGGER         VALID     
+SP_DEFAULT_TAGS_BIU                      TRIGGER         VALID     
+SP_ERROR_LOG_BI                          TRIGGER         VALID     
+SP_EXTERNAL_TICKETING_SYSTEMS_BIU        TRIGGER         VALID     
+SP_FAVORITES_BIU                         TRIGGER         VALID     
+SP_GROUPS_BIU                            TRIGGER         VALID     
+SP_GROUP_MEMBERS_BIU                     TRIGGER         VALID     
+SP_INITIATIVES_AI                        TRIGGER         VALID     
+SP_INITIATIVES_BD                        TRIGGER         VALID     
+SP_INITIATIVES_BIU                       TRIGGER         VALID     
+SP_INITIATIVE_APPROVALS_BD               TRIGGER         VALID     
+SP_INITIATIVE_APPROVALS_BIU              TRIGGER         VALID     
+SP_INITIATIVE_APPROVAL_CHAIN_BD          TRIGGER         VALID     
+SP_INITIATIVE_APPROVAL_CHAIN_BIU         TRIGGER         VALID     
+SP_INITIATIVE_COMMENTS_BD                TRIGGER         VALID     
+SP_INITIATIVE_COMMENTS_BIU               TRIGGER         VALID     
+SP_INITIATIVE_DEF_TASKS_BIU              TRIGGER         VALID     
+SP_INITIATIVE_DOCUMENTS_BIU              TRIGGER         VALID     
+SP_INITIATIVE_FOCUS_AREAS_AI             TRIGGER         VALID     
+SP_INITIATIVE_FOCUS_AREAS_BD             TRIGGER         VALID     
+SP_INITIATIVE_FOCUS_AREAS_BIU            TRIGGER         VALID     
+SP_INITIATIVE_LINKS_BIU                  TRIGGER         VALID     
+SP_INIT_FOCUS_AREA_COMMENTS_BD           TRIGGER         VALID     
+SP_INIT_FOCUS_AREA_COMMENTS_BIU          TRIGGER         VALID     
+SP_INIT_FOCUS_AREA_DOCUMENTS_BD          TRIGGER         VALID     
+SP_INIT_FOCUS_AREA_DOCUMENTS_BIU         TRIGGER         VALID     
+SP_INIT_FOCUS_AREA_LINKS_BD              TRIGGER         VALID     
+SP_INIT_FOCUS_AREA_LINKS_BIU             TRIGGER         VALID     
+SP_NOTIFICATIONS_BIU                     TRIGGER         VALID     
+SP_NOTIFICATION_SUBSCRIPTIONS_BIU        TRIGGER         VALID     
+SP_PROJECTS_AI                           TRIGGER         VALID     
+SP_PROJECTS_BD                           TRIGGER         VALID     
+SP_PROJECTS_BIU                          TRIGGER         VALID     
+SP_PROJECT_APPROVALS_BD                  TRIGGER         VALID     
+SP_PROJECT_APPROVALS_BIU                 TRIGGER         VALID     
+SP_PROJECT_APPROVAL_CHAIN_BIU            TRIGGER         VALID     
+SP_PROJECT_COMMENTS_BD                   TRIGGER         VALID     
+SP_PROJECT_COMMENTS_BIU                  TRIGGER         VALID     
+SP_PROJECT_CONTRIBUTORS_BD               TRIGGER         VALID     
+SP_PROJECT_CONTRIBUTORS_BIU              TRIGGER         VALID     
+SP_PROJECT_DOCUMENTS_BD                  TRIGGER         VALID     
+SP_PROJECT_DOCUMENTS_BIU                 TRIGGER         VALID     
+SP_PROJECT_GROUPS_BIU                    TRIGGER         VALID     
+SP_PROJECT_LINKS_BD                      TRIGGER         VALID     
+SP_PROJECT_LINKS_BIU                     TRIGGER         VALID     
+SP_PROJECT_PRIORITIES_BIU                TRIGGER         VALID     
+SP_PROJECT_RELATED_BIU                   TRIGGER         VALID     
+SP_PROJECT_SCALES_BIU                    TRIGGER         VALID     
+SP_PROJECT_SIZES_BIU                     TRIGGER         VALID     
+SP_PROJECT_STATUSES_BIU                  TRIGGER         VALID     
+SP_PROJ_INTERACTIONS_LOG_BIU             TRIGGER         VALID     
+SP_RELEASE_COMMENTS_BD                   TRIGGER         VALID     
+SP_RELEASE_COMMENTS_BIU                  TRIGGER         VALID     
+SP_RELEASE_DOCUMENTS_BD                  TRIGGER         VALID     
+SP_RELEASE_DOCUMENTS_BIU                 TRIGGER         VALID     
+SP_RELEASE_LINKS_BD                      TRIGGER         VALID     
+SP_RELEASE_LINKS_BIU                     TRIGGER         VALID     
+SP_RELEASE_MILESTONES_BD                 TRIGGER         VALID     
+SP_RELEASE_MILESTONES_BIU                TRIGGER         VALID     
+SP_RELEASE_MILESTONE_DEFAULT_TAGS_BIU    TRIGGER         VALID     
+SP_RELEASE_MILESTONE_TYPES_BIU           TRIGGER         VALID     
+SP_RELEASE_TRAINS_AI                     TRIGGER         VALID     
+SP_RELEASE_TRAINS_BD                     TRIGGER         VALID     
+SP_RELEASE_TRAINS_BIU                    TRIGGER         VALID     
+SP_REPORT_QUESTIONS_BIU                  TRIGGER         VALID     
+SP_RESOURCE_TYPES_BIU                    TRIGGER         VALID     
+SP_TASKS_AI                              TRIGGER         VALID     
+SP_TASKS_BD                              TRIGGER         VALID     
+SP_TASKS_BIU                             TRIGGER         VALID     
+SP_TASK_COMMENTS_BD                      TRIGGER         VALID     
+SP_TASK_COMMENTS_BIU                     TRIGGER         VALID     
+SP_TASK_DOCUMENTS_BD                     TRIGGER         VALID     
+SP_TASK_DOCUMENTS_BIU                    TRIGGER         VALID     
+SP_TASK_LINKS_BD                         TRIGGER         VALID     
+SP_TASK_LINKS_BIU                        TRIGGER         VALID     
+SP_TASK_STATUSES_BIU                     TRIGGER         VALID     
+SP_TASK_TYPES_BIU                        TRIGGER         VALID     
+SP_TEAM_MEMBERS_BIU                      TRIGGER         VALID     
+SP_TEAM_MEMBER_NOTIFICATIONS_BIU         TRIGGER         VALID     
+SP_DOCUMENTS_V                           VIEW            VALID     
+SP_INITIATIVE_COMMENTS_V                 VIEW            VALID     
+SP_INIT_FOCUS_AREA_COMMENTS_V            VIEW            VALID     
+SP_PROJECT_COMMENTS_V                    VIEW            VALID     
+SP_RELEASE_COMMENTS_V                    VIEW            VALID     
+SP_TASK_COMMENTS_V                       VIEW            VALID     
+
+118 rows selected. 
+
+=== TABLE COLUMNS FOR SP TABLES ===
+
+[1mTABLE_NAME[m                           [1mCOLUMN_NAME[m                     [1mDATA_TYPE[m       [1mDATA_LENGTH[m [1mNULLABLE[m    
+____________________________________ _______________________________ ____________ ______________ ___________ 
+SP_ACTIVITIES                        ID                              NUMBER                   22 N           
+SP_ACTIVITIES                        ACTIVITY_TYPE_ID                NUMBER                   22 Y           
+SP_ACTIVITIES                        PROJECT_ID                      NUMBER                   22 Y           
+SP_ACTIVITIES                        TEAM_MEMBER_ID                  NUMBER                   22 Y           
+SP_ACTIVITIES                        INITIATIVE_ID                   NUMBER                   22 Y           
+SP_ACTIVITIES                        START_DATE                      DATE                      7 N           
+SP_ACTIVITIES                        END_DATE                        DATE                      7 N           
+SP_ACTIVITIES                        COMMENTS                        VARCHAR2              16000 Y           
+SP_ACTIVITIES                        TICKET_NUMBER                   VARCHAR2                200 Y           
+SP_ACTIVITIES                        URL                             VARCHAR2               2000 Y           
+SP_ACTIVITIES                        ACTIVITY_STATUS                 VARCHAR2                120 Y           
+SP_ACTIVITIES                        TAGS                            VARCHAR2              16000 Y           
+SP_ACTIVITIES                        CREATED                         DATE                      7 N           
+SP_ACTIVITIES                        CREATED_BY                      VARCHAR2               1020 N           
+SP_ACTIVITIES                        UPDATED                         DATE                      7 N           
+SP_ACTIVITIES                        UPDATED_BY                      VARCHAR2               1020 N           
+SP_ACTIVITY_TYPES                    ID                              NUMBER                   22 N           
+SP_ACTIVITY_TYPES                    DISPLAY_SEQUENCE                NUMBER                   22 N           
+SP_ACTIVITY_TYPES                    ACTIVITY_TYPE                   VARCHAR2                200 N           
+SP_ACTIVITY_TYPES                    ACTIVITY_TYPE_DESCRIPTION       VARCHAR2              16000 Y           
+SP_ACTIVITY_TYPES                    IS_PROJECT_YN                   VARCHAR2                  4 Y           
+SP_ACTIVITY_TYPES                    STATIC_ID                       VARCHAR2                120 Y           
+SP_ACTIVITY_TYPES                    IS_DEFAULT_YN                   VARCHAR2                  4 Y           
+SP_ACTIVITY_TYPES                    IS_ACTIVE_YN                    VARCHAR2                  4 Y           
+SP_ACTIVITY_TYPES                    CREATED                         DATE                      7 N           
+SP_ACTIVITY_TYPES                    CREATED_BY                      VARCHAR2               1020 N           
+SP_ACTIVITY_TYPES                    UPDATED                         DATE                      7 N           
+SP_ACTIVITY_TYPES                    UPDATED_BY                      VARCHAR2               1020 N           
+SP_AI_PROMPTS                        ID                              NUMBER                   22 N           
+SP_AI_PROMPTS                        STATIC_ID                       VARCHAR2                255 N           
+SP_AI_PROMPTS                        DESCRIPTION                     VARCHAR2               4000 N           
+SP_AI_PROMPTS                        PROMPT                          CLOB                   4000 Y           
+SP_AI_PROMPTS                        CREATED                         DATE                      7 N           
+SP_AI_PROMPTS                        CREATED_BY                      VARCHAR2                255 N           
+SP_AI_PROMPTS                        UPDATED                         DATE                      7 N           
+SP_AI_PROMPTS                        UPDATED_BY                      VARCHAR2                255 N           
+SP_APPLICATION_NOTIFICATIONS         ID                              NUMBER                   22 N           
+SP_APPLICATION_NOTIFICATIONS         NOTIFICATION_NAME               VARCHAR2                512 N           
+SP_APPLICATION_NOTIFICATIONS         NOTIFICATION_DESCRIPTION        VARCHAR2              16000 Y           
+SP_APPLICATION_NOTIFICATIONS         IS_ACTIVE_YN                    VARCHAR2                  4 N           
+SP_APPLICATION_NOTIFICATIONS         REQUIRED_USER_TAG               VARCHAR2                120 Y           
+SP_APPLICATION_NOTIFICATIONS         FROM_DATE                       DATE                      7 Y           
+SP_APPLICATION_NOTIFICATIONS         TO_DATE                         DATE                      7 Y           
+SP_APPLICATION_NOTIFICATIONS         CREATED                         DATE                      7 N           
+SP_APPLICATION_NOTIFICATIONS         CREATED_BY                      VARCHAR2               1020 N           
+SP_APPLICATION_NOTIFICATIONS         UPDATED                         DATE                      7 N           
+SP_APPLICATION_NOTIFICATIONS         UPDATED_BY                      VARCHAR2               1020 N           
+SP_APPROVAL_TYPES                    ID                              NUMBER                   22 N           
+SP_APPROVAL_TYPES                    DISPLAY_SEQ                     NUMBER                   22 N           
+SP_APPROVAL_TYPES                    APPROVAL_TYPE                   VARCHAR2                120 N           
+SP_APPROVAL_TYPES                    DESCRIPTION                     VARCHAR2              16000 Y           
+SP_APPROVAL_TYPES                    ACTIVE_YN                       VARCHAR2                  4 N           
+SP_APPROVAL_TYPES                    CREATED                         DATE                      7 N           
+SP_APPROVAL_TYPES                    CREATED_BY                      VARCHAR2               1020 N           
+SP_APPROVAL_TYPES                    UPDATED                         DATE                      7 N           
+SP_APPROVAL_TYPES                    UPDATED_BY                      VARCHAR2               1020 N           
+SP_APP_LOG                           ID                              NUMBER                   22 N           
+SP_APP_LOG                           ACTIVITY                        VARCHAR2               1020 N           
+SP_APP_LOG                           DETAILS                         VARCHAR2              16000 Y           
+SP_APP_LOG                           CREATED                         DATE                      7 N           
+SP_APP_LOG                           CREATED_TRUNC                   DATE                      7 N           
+SP_APP_LOG                           CREATED_BY                      VARCHAR2               1020 N           
+SP_APP_NOMENCLATURE                  ID                              NUMBER                   22 N           
+SP_APP_NOMENCLATURE                  STATIC_ID                       VARCHAR2                200 Y           
+SP_APP_NOMENCLATURE                  DEFAULT_ORDER                   NUMBER                   22 Y           
+SP_APP_NOMENCLATURE                  CUSTOM_VALUE                    VARCHAR2                200 Y           
+SP_APP_NOMENCLATURE                  DEFAULT_VALUE                   VARCHAR2                200 Y           
+SP_APP_NOMENCLATURE                  DESCRIPTION                     VARCHAR2              16000 Y           
+SP_APP_NOMENCLATURE                  CREATED                         DATE                      7 N           
+SP_APP_NOMENCLATURE                  CREATED_BY                      VARCHAR2               1020 N           
+SP_APP_NOMENCLATURE                  UPDATED                         DATE                      7 N           
+SP_APP_NOMENCLATURE                  UPDATED_BY                      VARCHAR2               1020 N           
+SP_APP_SETTINGS                      ID                              NUMBER                   22 N           
+SP_APP_SETTINGS                      STATIC_ID                       VARCHAR2                255 N           
+SP_APP_SETTINGS                      DESCRIPTION                     VARCHAR2               4000 N           
+SP_APP_SETTINGS                      SETTING_VALUE                   VARCHAR2               4000 Y           
+SP_APP_SETTINGS                      IS_NUMERIC_YN                   VARCHAR2                  1 N           
+SP_APP_SETTINGS                      IS_YN                           VARCHAR2                  1 N           
+SP_APP_SETTINGS                      CREATED                         DATE                      7 N           
+SP_APP_SETTINGS                      CREATED_BY                      VARCHAR2                255 N           
+SP_APP_SETTINGS                      UPDATED                         DATE                      7 N           
+SP_APP_SETTINGS                      UPDATED_BY                      VARCHAR2                255 N           
+SP_AREAS                             ID                              NUMBER                   22 N           
+SP_AREAS                             AREA                            VARCHAR2                200 N           
+SP_AREAS                             DESCRIPTION                     VARCHAR2              16000 Y           
+SP_AREAS                             OWNER_ID                        NUMBER                   22 Y           
+SP_AREAS                             STATUS_SCALE                    VARCHAR2                  1 Y           
+SP_AREAS                             HIDDEN_BY_DEFAULT_YN            VARCHAR2                  4 Y           
+SP_AREAS                             TAGS                            VARCHAR2              16000 Y           
+SP_AREAS                             IMAGE                           BLOB                   4000 Y           
+SP_AREAS                             IMAGE_NAME                      VARCHAR2               2048 Y           
+SP_AREAS                             IMAGE_MIMETYPE                  VARCHAR2               2048 Y           
+SP_AREAS                             IMAGE_LAST_UPDATED              DATE                      7 Y           
+SP_AREAS                             CREATED                         DATE                      7 N           
+SP_AREAS                             CREATED_BY                      VARCHAR2               1020 N           
+SP_AREAS                             UPDATED                         DATE                      7 N           
+SP_AREAS                             UPDATED_BY                      VARCHAR2               1020 N           
+SP_COMMENT_IMAGES                    ID                              NUMBER                   22 N           
+SP_COMMENT_IMAGES                    FILE_BLOB                       BLOB                   4000 N           
+SP_COMMENT_IMAGES                    UNIQUE_FILENAME                 VARCHAR2               2048 N           
+SP_COMMENT_IMAGES                    FILENAME                        VARCHAR2               2048 Y           
+SP_COMMENT_IMAGES                    MIMETYPE                        VARCHAR2               2048 Y           
+SP_COMMENT_IMAGES                    BLOB_SIZE                       NUMBER                   22 Y           
+SP_COMMENT_IMAGES                    IMAGE_REF_ID                    NUMBER                   22 N           
+SP_COMMENT_IMAGES                    CREATED                         DATE                      7 N           
+SP_COMMENT_IMAGES                    CREATED_BY                      VARCHAR2               1020 N           
+SP_COMPETENCIES                      ID                              NUMBER                   22 N           
+SP_COMPETENCIES                      COMPETENCY                      VARCHAR2                400 N           
+SP_COMPETENCIES                      DESCRIPTION                     VARCHAR2              16000 Y           
+SP_COMPETENCIES                      CREATED                         DATE                      7 N           
+SP_COMPETENCIES                      CREATED_BY                      VARCHAR2               1020 N           
+SP_COMPETENCIES                      UPDATED                         DATE                      7 N           
+SP_COMPETENCIES                      UPDATED_BY                      VARCHAR2               1020 N           
+SP_CONFIGURABLE_TEXT                 ID                              NUMBER                   22 N           
+SP_CONFIGURABLE_TEXT                 CONFIG_ID                       VARCHAR2                200 N           
+SP_CONFIGURABLE_TEXT                 DESCRIPTION                     VARCHAR2              16000 N           
+SP_CONFIGURABLE_TEXT                 CONFIGURABLE_CONTENT            CLOB                   4000 Y           
+SP_CONFIGURABLE_TEXT                 CREATED                         DATE                      7 N           
+SP_CONFIGURABLE_TEXT                 CREATED_BY                      VARCHAR2               1020 N           
+SP_CONFIGURABLE_TEXT                 UPDATED                         DATE                      7 N           
+SP_CONFIGURABLE_TEXT                 UPDATED_BY                      VARCHAR2               1020 N           
+SP_COUNTRIES                         ID                              NUMBER                   22 N           
+SP_COUNTRIES                         COUNTRY_CODE                    VARCHAR2                  8 N           
+SP_COUNTRIES                         COUNTRY_CODE3                   VARCHAR2                 12 Y           
+SP_COUNTRIES                         COUNTRY_NAME                    VARCHAR2               1020 N           
+SP_COUNTRIES                         REGION                          VARCHAR2                120 N           
+SP_COUNTRIES                         DISPLAY_YN                      VARCHAR2                  4 N           
+SP_COUNTRIES                         QUICK_PICK_YN                   VARCHAR2                  4 N           
+SP_COUNTRIES                         LAT                             NUMBER                   22 Y           
+SP_COUNTRIES                         LON                             NUMBER                   22 Y           
+SP_COUNTRIES                         CREATED                         DATE                      7 Y           
+SP_COUNTRIES                         CREATED_BY                      VARCHAR2               1020 Y           
+SP_COUNTRIES                         UPDATED                         DATE                      7 Y           
+SP_COUNTRIES                         UPDATED_BY                      VARCHAR2               1020 Y           
+SP_DEFAULT_PEOPLE_TAGS               ID                              NUMBER                   22 N           
+SP_DEFAULT_PEOPLE_TAGS               DISPLAY_SEQUENCE                NUMBER                   22 N           
+SP_DEFAULT_PEOPLE_TAGS               TAG                             VARCHAR2                120 N           
+SP_DEFAULT_PEOPLE_TAGS               DESCRIPTION                     VARCHAR2               2048 Y           
+SP_DEFAULT_PEOPLE_TAGS               CREATED                         DATE                      7 N           
+SP_DEFAULT_PEOPLE_TAGS               CREATED_BY                      VARCHAR2               1020 N           
+SP_DEFAULT_PEOPLE_TAGS               UPDATED                         DATE                      7 N           
+SP_DEFAULT_PEOPLE_TAGS               UPDATED_BY                      VARCHAR2               1020 N           
+SP_DEFAULT_TAGS                      ID                              NUMBER                   22 N           
+SP_DEFAULT_TAGS                      DISPLAY_SEQUENCE                NUMBER                   22 N           
+SP_DEFAULT_TAGS                      TAG                             VARCHAR2                120 N           
+SP_DEFAULT_TAGS                      DESCRIPTION                     VARCHAR2               2048 Y           
+SP_DEFAULT_TAGS                      CREATED                         DATE                      7 N           
+SP_DEFAULT_TAGS                      CREATED_BY                      VARCHAR2               1020 N           
+SP_DEFAULT_TAGS                      UPDATED                         DATE                      7 N           
+SP_DEFAULT_TAGS                      UPDATED_BY                      VARCHAR2               1020 N           
+SP_DOCUMENTS_V                       DOC_TYPE                        VARCHAR2                 21 Y           
+SP_DOCUMENTS_V                       LINK                            VARCHAR2              32767 Y           
+SP_DOCUMENTS_V                       NAME                            VARCHAR2               1840 Y           
+SP_DOCUMENTS_V                       PROJECT                         VARCHAR2               1020 Y           
+SP_DOCUMENTS_V                       DOCUMENT_FILENAME               VARCHAR2               2048 Y           
+SP_DOCUMENTS_V                       UPDATED                         DATE                      7 Y           
+SP_DOCUMENTS_V                       CREATED                         DATE                      7 Y           
+SP_DOCUMENTS_V                       DOC_DESCRIPTION                 VARCHAR2                812 Y           
+SP_DOCUMENTS_V                       ADDED_BY                        VARCHAR2               1020 Y           
+SP_DOCUMENTS_V                       FILESIZE                        NUMBER                   22 Y           
+SP_DOCUMENTS_V                       FILE_EXTENSION                  VARCHAR2               2048 Y           
+SP_DOCUMENTS_V                       TAGS                            VARCHAR2              16000 Y           
+SP_DOCUMENTS_V                       RELEASE                         VARCHAR2                324 Y           
+SP_DOCUMENTS_V                       IMPORTANT                       VARCHAR2                  3 Y           
+SP_DOCUMENTS_V                       DOCUMENT_ID                     NUMBER                   22 Y           
+SP_DOCUMENTS_V                       DOCUMENT_BLOB                   BLOB                   4000 Y           
+SP_DOCUMENTS_V                       DOCUMENT_MIMETYPE               VARCHAR2               2048 Y           
+SP_DOCUMENTS_V                       DOCUMENT_LASTUPD                DATE                      7 Y           
+SP_DOCUMENTS_V                       DOCUMENT_CHARSET                VARCHAR2               2048 Y           
+SP_DOCUMENTS_V                       PROJECT_ID                      NUMBER                   22 Y           
+SP_DOCUMENTS_V                       RELEASE_ID                      NUMBER                   22 Y           
+SP_DOCUMENTS_V                       TASK_ID                         NUMBER                   22 Y           
+SP_DOCUMENTS_V                       INITIATIVE_ID                   NUMBER                   22 Y           
+SP_DOCUMENTS_V                       INITIATIVE_FOCUS_AREA_ID        NUMBER                   22 Y           
+SP_ERROR_LOG                         ID                              NUMBER                   22 N           
+SP_ERROR_LOG                         PACKAGE_NAME                    VARCHAR2               1020 Y           
+SP_ERROR_LOG                         PROCEDURE_NAME                  VARCHAR2               2000 Y           
+SP_ERROR_LOG                         ERROR                           VARCHAR2              16000 N           
+SP_ERROR_LOG                         ARG1_NAME                       VARCHAR2               1020 Y           
+SP_ERROR_LOG                         ARG1_VAL                        VARCHAR2              16000 Y           
+SP_ERROR_LOG                         ARG2_NAME                       VARCHAR2               1020 Y           
+SP_ERROR_LOG                         ARG2_VAL                        VARCHAR2              16000 Y           
+SP_ERROR_LOG                         ARG3_NAME                       VARCHAR2               1020 Y           
+SP_ERROR_LOG                         ARG3_VAL                        VARCHAR2              16000 Y           
+SP_ERROR_LOG                         ARG4_NAME                       VARCHAR2               1020 Y           
+SP_ERROR_LOG                         ARG4_VAL                        VARCHAR2              16000 Y           
+SP_ERROR_LOG                         ARG5_NAME                       VARCHAR2               1020 Y           
+SP_ERROR_LOG                         ARG5_VAL                        VARCHAR2              16000 Y           
+SP_ERROR_LOG                         CREATED                         DATE                      7 Y           
+SP_ERROR_LOG                         CREATED_TRUNC                   DATE                      7 Y           
+SP_ERROR_LOG                         CREATED_BY                      VARCHAR2               1020 Y           
+SP_EXTERNAL_TICKETING_SYSTEMS        ID                              NUMBER                   22 N           
+SP_EXTERNAL_TICKETING_SYSTEMS        EXTERNAL_SYSTEM_NAME            VARCHAR2                120 N           
+SP_EXTERNAL_TICKETING_SYSTEMS        DESCRIPTION                     VARCHAR2              16000 Y           
+SP_EXTERNAL_TICKETING_SYSTEMS        IS_ACTIVE_YN                    VARCHAR2                  4 N           
+SP_EXTERNAL_TICKETING_SYSTEMS        LINK_PATTERN                    VARCHAR2              16000 N           
+SP_EXTERNAL_TICKETING_SYSTEMS        MIN_ID_LENGTH                   NUMBER                   22 Y           
+SP_EXTERNAL_TICKETING_SYSTEMS        MAX_ID_LENGTH                   NUMBER                   22 Y           
+SP_EXTERNAL_TICKETING_SYSTEMS        MUST_CONTAIN                    VARCHAR2               1020 Y           
+SP_EXTERNAL_TICKETING_SYSTEMS        TICKET_ID_REGEX                 VARCHAR2               1020 N           
+SP_EXTERNAL_TICKETING_SYSTEMS        EVAULATION_SEQUENCE             NUMBER                   22 Y           
+SP_EXTERNAL_TICKETING_SYSTEMS        REQUIRED_INITIATIVE_ID          NUMBER                   22 Y           
+SP_EXTERNAL_TICKETING_SYSTEMS        CREATED                         DATE                      7 N           
+SP_EXTERNAL_TICKETING_SYSTEMS        CREATED_BY                      VARCHAR2               1020 N           
+SP_EXTERNAL_TICKETING_SYSTEMS        UPDATED                         DATE                      7 N           
+SP_EXTERNAL_TICKETING_SYSTEMS        UPDATED_BY                      VARCHAR2               1020 N           
+SP_FAVORITES                         ID                              NUMBER                   22 N           
+SP_FAVORITES                         PROJECT_ID                      NUMBER                   22 Y           
+SP_FAVORITES                         TEAM_MEMBER_ID                  NUMBER                   22 Y           
+SP_FAVORITES                         CREATED                         DATE                      7 N           
+SP_FAVORITES                         CREATED_BY                      VARCHAR2               1020 N           
+SP_FAVORITES                         UPDATED                         DATE                      7 N           
+SP_FAVORITES                         UPDATED_BY                      VARCHAR2               1020 N           
+SP_GROUPS                            ID                              NUMBER                   22 N           
+SP_GROUPS                            GROUP_NAME                      VARCHAR2                400 N           
+SP_GROUPS                            GROUP_NAME_UPPER                VARCHAR2                400 N           
+SP_GROUPS                            DESCRIPTION                     VARCHAR2              16000 Y           
+SP_GROUPS                            GROUP_TAG                       VARCHAR2                400 Y           
+SP_GROUPS                            CREATED                         DATE                      7 N           
+SP_GROUPS                            CREATED_BY                      VARCHAR2               1020 N           
+SP_GROUPS                            UPDATED                         DATE                      7 N           
+SP_GROUPS                            UPDATED_BY                      VARCHAR2               1020 N           
+SP_GROUP_MEMBERS                     ID                              NUMBER                   22 N           
+SP_GROUP_MEMBERS                     GROUP_ID                        NUMBER                   22 N           
+SP_GROUP_MEMBERS                     TEAM_MEMBER_ID                  NUMBER                   22 N           
+SP_GROUP_MEMBERS                     ASSIGNMENT                      VARCHAR2               1020 Y           
+SP_GROUP_MEMBERS                     FULL_TIME_YN                    VARCHAR2                  4 Y           
+SP_GROUP_MEMBERS                     GROUP_LEADER_YN                 VARCHAR2                  4 Y           
+SP_GROUP_MEMBERS                     CREATED                         DATE                      7 N           
+SP_GROUP_MEMBERS                     CREATED_BY                      VARCHAR2               1020 N           
+SP_GROUP_MEMBERS                     UPDATED                         DATE                      7 N           
+SP_GROUP_MEMBERS                     UPDATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVES                       ID                              NUMBER                   22 N           
+SP_INITIATIVES                       AREA_ID                         NUMBER                   22 N           
+SP_INITIATIVES                       INITIATIVE                      VARCHAR2               1020 N           
+SP_INITIATIVES                       OBJECTIVE                       VARCHAR2              16000 Y           
+SP_INITIATIVES                       SPONSOR_ID                      NUMBER                   22 Y           
+SP_INITIATIVES                       FRIENDLY_IDENTIFIER             VARCHAR2                 30 Y           
+SP_INITIATIVES                       INITIATIVE_URL_NAME             VARCHAR2                255 Y           
+SP_INITIATIVES                       STATUS_SCALE                    VARCHAR2                  1 Y           
+SP_INITIATIVES                       TAGS                            VARCHAR2              16000 Y           
+SP_INITIATIVES                       HIDDEN_BY_DEFAULT_YN            VARCHAR2                  4 Y           
+SP_INITIATIVES                       IMAGE                           BLOB                   4000 Y           
+SP_INITIATIVES                       IMAGE_NAME                      VARCHAR2               2048 Y           
+SP_INITIATIVES                       IMAGE_MIMETYPE                  VARCHAR2               2048 Y           
+SP_INITIATIVES                       IMAGE_LAST_UPDATED              DATE                      7 Y           
+SP_INITIATIVES                       ARCHIVED_YN                     VARCHAR2                  4 Y           
+SP_INITIATIVES                       ARCHIVED_DATE                   DATE                      7 Y           
+SP_INITIATIVES                       ARCHIVED_BY                     VARCHAR2               1020 Y           
+SP_INITIATIVES                       CREATED                         DATE                      7 N           
+SP_INITIATIVES                       CREATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVES                       UPDATED                         DATE                      7 N           
+SP_INITIATIVES                       UPDATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_APPROVALS              ID                              NUMBER                   22 N           
+SP_INITIATIVE_APPROVALS              INITIATIVE_ID                   NUMBER                   22 Y           
+SP_INITIATIVE_APPROVALS              APPROVAL_TYPE_ID                NUMBER                   22 N           
+SP_INITIATIVE_APPROVALS              ACTIVE_YN                       VARCHAR2                  4 N           
+SP_INITIATIVE_APPROVALS              CREATED                         DATE                      7 N           
+SP_INITIATIVE_APPROVALS              CREATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_APPROVALS              UPDATED                         DATE                      7 N           
+SP_INITIATIVE_APPROVALS              UPDATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_APPROVAL_CHAIN         ID                              NUMBER                   22 N           
+SP_INITIATIVE_APPROVAL_CHAIN         INITIATIVE_APPROVAL_ID          NUMBER                   22 N           
+SP_INITIATIVE_APPROVAL_CHAIN         TEAM_MEMBER_ID                  NUMBER                   22 Y           
+SP_INITIATIVE_APPROVAL_CHAIN         APPROVAL_SEQ                    NUMBER                   22 N           
+SP_INITIATIVE_APPROVAL_CHAIN         ACTIVE_YN                       VARCHAR2                  4 N           
+SP_INITIATIVE_APPROVAL_CHAIN         ALTERNATE_TEAM_MEMBER_ID        NUMBER                   22 Y           
+SP_INITIATIVE_APPROVAL_CHAIN         ALTERNATE_START_DATE            DATE                      7 Y           
+SP_INITIATIVE_APPROVAL_CHAIN         ALTERNATE_END_DATE              DATE                      7 Y           
+SP_INITIATIVE_APPROVAL_CHAIN         CREATED                         DATE                      7 N           
+SP_INITIATIVE_APPROVAL_CHAIN         CREATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_APPROVAL_CHAIN         UPDATED                         DATE                      7 N           
+SP_INITIATIVE_APPROVAL_CHAIN         UPDATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_COMMENTS               ID                              NUMBER                   22 N           
+SP_INITIATIVE_COMMENTS               INITIATIVE_ID                   NUMBER                   22 Y           
+SP_INITIATIVE_COMMENTS               BODY                            CLOB                   4000 Y           
+SP_INITIATIVE_COMMENTS               BODY_HTML                       CLOB                   4000 Y           
+SP_INITIATIVE_COMMENTS               BODY_NO_IMAGES                  CLOB                   4000 Y           
+SP_INITIATIVE_COMMENTS               IMAGE_REF_ID                    NUMBER                   22 Y           
+SP_INITIATIVE_COMMENTS               AUTHOR_ID                       NUMBER                   22 Y           
+SP_INITIATIVE_COMMENTS               PRIVATE_YN                      VARCHAR2                  4 Y           
+SP_INITIATIVE_COMMENTS               CREATED                         DATE                      7 N           
+SP_INITIATIVE_COMMENTS               CREATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_COMMENTS               UPDATED                         DATE                      7 N           
+SP_INITIATIVE_COMMENTS               UPDATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_COMMENTS_V             ID                              NUMBER                   22 N           
+SP_INITIATIVE_COMMENTS_V             INITIATIVE_ID                   NUMBER                   22 Y           
+SP_INITIATIVE_COMMENTS_V             BODY                            CLOB                  32600 Y           
+SP_INITIATIVE_COMMENTS_V             BODY_HTML                       CLOB                  32600 Y           
+SP_INITIATIVE_COMMENTS_V             BODY_NO_IMAGES                  CLOB                   4000 Y           
+SP_INITIATIVE_COMMENTS_V             AUTHOR_ID                       NUMBER                   22 Y           
+SP_INITIATIVE_COMMENTS_V             PRIVATE_YN                      VARCHAR2                  4 Y           
+SP_INITIATIVE_COMMENTS_V             IMAGE_REF_ID                    NUMBER                   22 Y           
+SP_INITIATIVE_COMMENTS_V             CREATED                         DATE                      7 N           
+SP_INITIATIVE_COMMENTS_V             CREATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_COMMENTS_V             UPDATED                         DATE                      7 N           
+SP_INITIATIVE_COMMENTS_V             UPDATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_DEFAULT_TASKS          ID                              NUMBER                   22 N           
+SP_INITIATIVE_DEFAULT_TASKS          INITIATIVE_ID                   NUMBER                   22 N           
+SP_INITIATIVE_DEFAULT_TASKS          TYPE_ID                         NUMBER                   22 N           
+SP_INITIATIVE_DEFAULT_TASKS          CREATED                         DATE                      7 N           
+SP_INITIATIVE_DEFAULT_TASKS          CREATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_DEFAULT_TASKS          UPDATED                         DATE                      7 N           
+SP_INITIATIVE_DEFAULT_TASKS          UPDATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_DOCUMENTS              ID                              NUMBER                   22 N           
+SP_INITIATIVE_DOCUMENTS              INITIATIVE_ID                   NUMBER                   22 Y           
+SP_INITIATIVE_DOCUMENTS              DOCUMENT_BLOB                   BLOB                   4000 Y           
+SP_INITIATIVE_DOCUMENTS              DOCUMENT_FILENAME               VARCHAR2               2048 Y           
+SP_INITIATIVE_DOCUMENTS              DOCUMENT_MIMETYPE               VARCHAR2               2048 Y           
+SP_INITIATIVE_DOCUMENTS              DOCUMENT_CHARSET                VARCHAR2               2048 Y           
+SP_INITIATIVE_DOCUMENTS              DOCUMENT_LASTUPD                DATE                      7 Y           
+SP_INITIATIVE_DOCUMENTS              IMPORTANT_YN                    VARCHAR2                  4 Y           
+SP_INITIATIVE_DOCUMENTS              DOC_DESCRIPTION                 VARCHAR2              16000 Y           
+SP_INITIATIVE_DOCUMENTS              TAGS                            VARCHAR2              16000 Y           
+SP_INITIATIVE_DOCUMENTS              CREATED                         DATE                      7 N           
+SP_INITIATIVE_DOCUMENTS              CREATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_DOCUMENTS              UPDATED                         DATE                      7 N           
+SP_INITIATIVE_DOCUMENTS              UPDATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_FOCUS_AREAS            ID                              NUMBER                   22 N           
+SP_INITIATIVE_FOCUS_AREAS            INITIATIVE_ID                   NUMBER                   22 N           
+SP_INITIATIVE_FOCUS_AREAS            FOCUS_AREA                      VARCHAR2                240 N           
+SP_INITIATIVE_FOCUS_AREAS            ACTIVE_YN                       VARCHAR2                  4 N           
+SP_INITIATIVE_FOCUS_AREAS            DISPLAY_SEQUENCE                NUMBER                   22 Y           
+SP_INITIATIVE_FOCUS_AREAS            DEVELOPMENT_OWNER_ID            NUMBER                   22 Y           
+SP_INITIATIVE_FOCUS_AREAS            DESCRIPTION                     VARCHAR2              16000 Y           
+SP_INITIATIVE_FOCUS_AREAS            CREATED                         DATE                      7 N           
+SP_INITIATIVE_FOCUS_AREAS            CREATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_FOCUS_AREAS            UPDATED                         DATE                      7 N           
+SP_INITIATIVE_FOCUS_AREAS            UPDATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_HISTORY                ID                              NUMBER                   22 N           
+SP_INITIATIVE_HISTORY                INITIATIVE_ID                   NUMBER                   22 N           
+SP_INITIATIVE_HISTORY                ATTRIBUTE_COLUMN                VARCHAR2               1020 N           
+SP_INITIATIVE_HISTORY                CHANGE_TYPE                     VARCHAR2                120 N           
+SP_INITIATIVE_HISTORY                OLD_VALUE                       VARCHAR2              16000 Y           
+SP_INITIATIVE_HISTORY                NEW_VALUE                       VARCHAR2              16000 Y           
+SP_INITIATIVE_HISTORY                OLD_VALUE_CLOB                  CLOB                   4000 Y           
+SP_INITIATIVE_HISTORY                NEW_VALUE_CLOB                  CLOB                   4000 Y           
+SP_INITIATIVE_HISTORY                CHANGED_ON                      DATE                      7 N           
+SP_INITIATIVE_HISTORY                CHANGED_BY                      VARCHAR2               1020 Y           
+SP_INITIATIVE_LINKS                  ID                              NUMBER                   22 N           
+SP_INITIATIVE_LINKS                  INITIATIVE_ID                   NUMBER                   22 Y           
+SP_INITIATIVE_LINKS                  LINK_NAME                       VARCHAR2               1020 N           
+SP_INITIATIVE_LINKS                  LINK_URL                        VARCHAR2              16000 Y           
+SP_INITIATIVE_LINKS                  IMPORTANT_YN                    VARCHAR2                  4 N           
+SP_INITIATIVE_LINKS                  CREATED                         DATE                      7 N           
+SP_INITIATIVE_LINKS                  CREATED_BY                      VARCHAR2               1020 N           
+SP_INITIATIVE_LINKS                  UPDATED                         DATE                      7 N           
+SP_INITIATIVE_LINKS                  UPDATED_BY                      VARCHAR2               1020 N           
+SP_INIT_FOCUS_AREA_COMMENTS          ID                              NUMBER                   22 N           
+SP_INIT_FOCUS_AREA_COMMENTS          INIT_FOCUS_AREA_ID              NUMBER                   22 N           
+SP_INIT_FOCUS_AREA_COMMENTS          BODY                            CLOB                   4000 Y           
+SP_INIT_FOCUS_AREA_COMMENTS          BODY_HTML                       CLOB                   4000 Y           
+SP_INIT_FOCUS_AREA_COMMENTS          BODY_NO_IMAGES                  CLOB                   4000 Y           
+SP_INIT_FOCUS_AREA_COMMENTS          IMAGE_REF_ID                    NUMBER                   22 Y           
+SP_INIT_FOCUS_AREA_COMMENTS          AUTHOR_ID                       NUMBER                   22 Y           
+SP_INIT_FOCUS_AREA_COMMENTS          PRIVATE_YN                      VARCHAR2                  4 N           
+SP_INIT_FOCUS_AREA_COMMENTS          CREATED                         DATE                      7 N           
+SP_INIT_FOCUS_AREA_COMMENTS          CREATED_BY                      VARCHAR2               1020 N           
+SP_INIT_FOCUS_AREA_COMMENTS          UPDATED                         DATE                      7 N           
+SP_INIT_FOCUS_AREA_COMMENTS          UPDATED_BY                      VARCHAR2               1020 N           
+SP_INIT_FOCUS_AREA_COMMENTS_V        ID                              NUMBER                   22 N           
+SP_INIT_FOCUS_AREA_COMMENTS_V        INIT_FOCUS_AREA_ID              NUMBER                   22 N           
+SP_INIT_FOCUS_AREA_COMMENTS_V        BODY                            CLOB                  32600 Y           
+SP_INIT_FOCUS_AREA_COMMENTS_V        BODY_HTML                       CLOB                  32600 Y           
+SP_INIT_FOCUS_AREA_COMMENTS_V        BODY_NO_IMAGES                  CLOB                   4000 Y           
+SP_INIT_FOCUS_AREA_COMMENTS_V        AUTHOR_ID                       NUMBER                   22 Y           
+SP_INIT_FOCUS_AREA_COMMENTS_V        PRIVATE_YN                      VARCHAR2                  4 N           
+SP_INIT_FOCUS_AREA_COMMENTS_V        IMAGE_REF_ID                    NUMBER                   22 Y           
+SP_INIT_FOCUS_AREA_COMMENTS_V        CREATED                         DATE                      7 N           
+SP_INIT_FOCUS_AREA_COMMENTS_V        CREATED_BY                      VARCHAR2               1020 N           
+SP_INIT_FOCUS_AREA_COMMENTS_V        UPDATED                         DATE                      7 N           
+SP_INIT_FOCUS_AREA_COMMENTS_V        UPDATED_BY                      VARCHAR2               1020 N           
+SP_INIT_FOCUS_AREA_DOCUMENTS         ID                              NUMBER                   22 N           
+SP_INIT_FOCUS_AREA_DOCUMENTS         INIT_FOCUS_AREA_ID              NUMBER                   22 N           
+SP_INIT_FOCUS_AREA_DOCUMENTS         DOCUMENT_BLOB                   BLOB                   4000 Y           
+SP_INIT_FOCUS_AREA_DOCUMENTS         DOCUMENT_FILENAME               VARCHAR2               2048 Y           
+SP_INIT_FOCUS_AREA_DOCUMENTS         DOCUMENT_MIMETYPE               VARCHAR2               2048 Y           
+SP_INIT_FOCUS_AREA_DOCUMENTS         DOCUMENT_CHARSET                VARCHAR2               2048 Y           
+SP_INIT_FOCUS_AREA_DOCUMENTS         DOCUMENT_LASTUPD                DATE                      7 Y           
+SP_INIT_FOCUS_AREA_DOCUMENTS         IMPORTANT_YN                    VARCHAR2                  4 N           
+SP_INIT_FOCUS_AREA_DOCUMENTS         DOC_DESCRIPTION                 VARCHAR2              16000 Y           
+SP_INIT_FOCUS_AREA_DOCUMENTS         TAGS                            VARCHAR2              16000 Y           
+SP_INIT_FOCUS_AREA_DOCUMENTS         CREATED                         DATE                      7 N           
+SP_INIT_FOCUS_AREA_DOCUMENTS         CREATED_BY                      VARCHAR2               1020 N           
+SP_INIT_FOCUS_AREA_DOCUMENTS         UPDATED                         DATE                      7 N           
+SP_INIT_FOCUS_AREA_DOCUMENTS         UPDATED_BY                      VARCHAR2               1020 N           
+SP_INIT_FOCUS_AREA_HISTORY           ID                              NUMBER                   22 N           
+SP_INIT_FOCUS_AREA_HISTORY           INIT_FOCUS_AREA_ID              NUMBER                   22 N           
+SP_INIT_FOCUS_AREA_HISTORY           ATTRIBUTE_COLUMN                VARCHAR2               1020 N           
+SP_INIT_FOCUS_AREA_HISTORY           CHANGE_TYPE                     VARCHAR2                120 N           
+SP_INIT_FOCUS_AREA_HISTORY           OLD_VALUE                       VARCHAR2              16000 Y           
+SP_INIT_FOCUS_AREA_HISTORY           NEW_VALUE                       VARCHAR2              16000 Y           
+SP_INIT_FOCUS_AREA_HISTORY           OLD_VALUE_CLOB                  CLOB                   4000 Y           
+SP_INIT_FOCUS_AREA_HISTORY           NEW_VALUE_CLOB                  CLOB                   4000 Y           
+SP_INIT_FOCUS_AREA_HISTORY           CHANGED_ON                      DATE                      7 N           
+SP_INIT_FOCUS_AREA_HISTORY           CHANGED_BY                      VARCHAR2               1020 Y           
+SP_INIT_FOCUS_AREA_LINKS             ID                              NUMBER                   22 N           
+SP_INIT_FOCUS_AREA_LINKS             INIT_FOCUS_AREA_ID              NUMBER                   22 N           
+SP_INIT_FOCUS_AREA_LINKS             LINK_NAME                       VARCHAR2               1020 N           
+SP_INIT_FOCUS_AREA_LINKS             LINK_URL                        VARCHAR2              16000 N           
+SP_INIT_FOCUS_AREA_LINKS             IMPORTANT_YN                    VARCHAR2                  4 N           
+SP_INIT_FOCUS_AREA_LINKS             CREATED                         DATE                      7 N           
+SP_INIT_FOCUS_AREA_LINKS             CREATED_BY                      VARCHAR2               1020 N           
+SP_INIT_FOCUS_AREA_LINKS             UPDATED                         DATE                      7 N           
+SP_INIT_FOCUS_AREA_LINKS             UPDATED_BY                      VARCHAR2               1020 N           
+SP_NOTIFICATIONS                     ID                              NUMBER                   22 N           
+SP_NOTIFICATIONS                     NAME                            VARCHAR2                600 N           
+SP_NOTIFICATIONS                     STATIC_ID                       VARCHAR2                120 N           
+SP_NOTIFICATIONS                     DESCRIPTION                     VARCHAR2              16000 N           
+SP_NOTIFICATIONS                     IS_ACTIVE_YN                    VARCHAR2                  4 N           
+SP_NOTIFICATIONS                     CREATED                         DATE                      7 N           
+SP_NOTIFICATIONS                     CREATED_BY                      VARCHAR2               1020 N           
+SP_NOTIFICATIONS                     UPDATED                         DATE                      7 N           
+SP_NOTIFICATIONS                     UPDATED_BY                      VARCHAR2               1020 N           
+SP_NOTIFICATION_SUBSCRIPTIONS        ID                              NUMBER                   22 N           
+SP_NOTIFICATION_SUBSCRIPTIONS        TEAM_MEMBER_ID                  NUMBER                   22 N           
+SP_NOTIFICATION_SUBSCRIPTIONS        NOTIFICATION_ID                 NUMBER                   22 N           
+SP_NOTIFICATION_SUBSCRIPTIONS        RELEASE_ID                      NUMBER                   22 Y           
+SP_NOTIFICATION_SUBSCRIPTIONS        OPTED_IN_YN                     VARCHAR2                  1 N           
+SP_NOTIFICATION_SUBSCRIPTIONS        FREQUENCY                       VARCHAR2                 30 N           
+SP_NOTIFICATION_SUBSCRIPTIONS        LAST_SENT                       DATE                      7 Y           
+SP_NOTIFICATION_SUBSCRIPTIONS        CREATED                         DATE                      7 N           
+SP_NOTIFICATION_SUBSCRIPTIONS        CREATED_BY                      VARCHAR2               1020 N           
+SP_NOTIFICATION_SUBSCRIPTIONS        UPDATED                         DATE                      7 N           
+SP_NOTIFICATION_SUBSCRIPTIONS        UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECTS                          ID                              NUMBER                   22 N           
+SP_PROJECTS                          FRIENDLY_IDENTIFIER             VARCHAR2                120 Y           
+SP_PROJECTS                          PROJECT_URL_NAME                VARCHAR2               1020 Y           
+SP_PROJECTS                          INITIATIVE_ID                   NUMBER                   22 Y           
+SP_PROJECTS                          PROJECT                         VARCHAR2               1020 N           
+SP_PROJECTS                          UPPER_PROJECT_NAME              VARCHAR2               1020 Y           
+SP_PROJECTS                          OWNER_ID                        NUMBER                   22 Y           
+SP_PROJECTS                          ACTIVE_YN                       VARCHAR2                  4 N           
+SP_PROJECTS                          PRIORITY_ID                     NUMBER                   22 Y           
+SP_PROJECTS                          RELEASE_ID                      NUMBER                   22 Y           
+SP_PROJECTS                          PROJECT_GROUP_ID                NUMBER                   22 Y           
+SP_PROJECTS                          RELEASE                         VARCHAR2                120 Y           
+SP_PROJECTS                          TARGET_COMPLETE                 DATE                      7 Y           
+SP_PROJECTS                          PCT_COMPLETE                    NUMBER                   22 Y           
+SP_PROJECTS                          STATUS_ID                       NUMBER                   22 Y           
+SP_PROJECTS                          PROJECT_SIZE                    VARCHAR2                 40 Y           
+SP_PROJECTS                          STATUS_SCALE                    VARCHAR2                  1 N           
+SP_PROJECTS                          REQUIRES_REVIEWS_YN             VARCHAR2                  1 N           
+SP_PROJECTS                          DOC_IMPACT_YN                   VARCHAR2                  4 N           
+SP_PROJECTS                          DESCRIPTION                     CLOB                   4000 Y           
+SP_PROJECTS                          KB_STACK_RANK                   NUMBER                   22 N           
+SP_PROJECTS                          COMMENTS                        NUMBER                   22 Y           
+SP_PROJECTS                          LINKS                           NUMBER                   22 Y           
+SP_PROJECTS                          DOCUMENTS                       NUMBER                   22 Y           
+SP_PROJECTS                          TAGS                            VARCHAR2              16000 Y           
+SP_PROJECTS                          FOCUS_AREA_ID                   NUMBER                   22 Y           
+SP_PROJECTS                          DISPLAY_EXTERNAL_LINK_YN        VARCHAR2                  4 Y           
+SP_PROJECTS                          EXTERNAL_TICKET_IDENTIFIER      VARCHAR2                512 Y           
+SP_PROJECTS                          EXTERNAL_TICKET_SYSTEM          VARCHAR2                120 Y           
+SP_PROJECTS                          EXTERNAL_SYSTEM_LINK            VARCHAR2              16000 Y           
+SP_PROJECTS                          DUPLICATE_OF_PROJECT_ID         NUMBER                   22 Y           
+SP_PROJECTS                          ARCHIVED_YN                     VARCHAR2                  4 Y           
+SP_PROJECTS                          ARCHIVED_DATE                   DATE                      7 Y           
+SP_PROJECTS                          ARCHIVED_BY                     VARCHAR2               1020 Y           
+SP_PROJECTS                          BLOCKED_BY_YN                   VARCHAR2                  4 Y           
+SP_PROJECTS                          BLOCKED_BY_PROJECT_ID           NUMBER                   22 Y           
+SP_PROJECTS                          BLOCKED_BY_COMMENT              VARCHAR2              16000 Y           
+SP_PROJECTS                          CREATED                         DATE                      7 N           
+SP_PROJECTS                          CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECTS                          UPDATED                         DATE                      7 N           
+SP_PROJECTS                          UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_AI_SUMMARIES              ID                              NUMBER                   22 N           
+SP_PROJECT_AI_SUMMARIES              PROJECT_ID                      NUMBER                   22 Y           
+SP_PROJECT_AI_SUMMARIES              SUMMARY_TYPE                    VARCHAR2                 30 Y           
+SP_PROJECT_AI_SUMMARIES              PROMPT_SENT                     CLOB                   4000 Y           
+SP_PROJECT_AI_SUMMARIES              DETAILS_SENT                    CLOB                   4000 Y           
+SP_PROJECT_AI_SUMMARIES              DATA_RECEIVED                   CLOB                   4000 Y           
+SP_PROJECT_AI_SUMMARIES              SUMMARY                         CLOB                   4000 Y           
+SP_PROJECT_AI_SUMMARIES              RISK                            VARCHAR2                100 Y           
+SP_PROJECT_AI_SUMMARIES              HIGHLIGHTS                      VARCHAR2               4000 Y           
+SP_PROJECT_AI_SUMMARIES              CREATED                         DATE                      7 N           
+SP_PROJECT_APPROVALS                 ID                              NUMBER                   22 N           
+SP_PROJECT_APPROVALS                 APPROVAL_TYPE_ID                NUMBER                   22 N           
+SP_PROJECT_APPROVALS                 PROJECT_ID                      NUMBER                   22 N           
+SP_PROJECT_APPROVALS                 SUBMITTED_BY_TEAM_MEMBER_ID     NUMBER                   22 N           
+SP_PROJECT_APPROVALS                 JUSTIFICATION                   VARCHAR2               4000 N           
+SP_PROJECT_APPROVALS                 SUBMITTED                       DATE                      7 N           
+SP_PROJECT_APPROVALS                 INITIATIVE_APPROVAL_ID          NUMBER                   22 Y           
+SP_PROJECT_APPROVALS                 STATUS                          VARCHAR2                 30 N           
+SP_PROJECT_APPROVALS                 WITHDRAWN_BY_TEAM_MEMBER_ID     NUMBER                   22 Y           
+SP_PROJECT_APPROVALS                 UPDATED                         DATE                      7 N           
+SP_PROJECT_APPROVALS                 UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_APPROVAL_CHAIN            ID                              NUMBER                   22 N           
+SP_PROJECT_APPROVAL_CHAIN            PROJECT_APPROVAL_ID             NUMBER                   22 N           
+SP_PROJECT_APPROVAL_CHAIN            INITIATIVE_APPROVAL_CHAIN_ID    NUMBER                   22 Y           
+SP_PROJECT_APPROVAL_CHAIN            TEAM_MEMBER_ID                  NUMBER                   22 N           
+SP_PROJECT_APPROVAL_CHAIN            STATUS                          VARCHAR2                120 N           
+SP_PROJECT_APPROVAL_CHAIN            LAST_STATUS_ON                  DATE                      7 N           
+SP_PROJECT_APPROVAL_CHAIN            COMMENTS                        VARCHAR2               4000 Y           
+SP_PROJECT_APPROVAL_CHAIN            RESPONSE                        VARCHAR2               4000 Y           
+SP_PROJECT_APPROVAL_CHAIN            RESPONSE_BY_TEAM_MEMBER_ID      NUMBER                   22 Y           
+SP_PROJECT_APPROVAL_CHAIN            RESPONDED_ON                    DATE                      7 Y           
+SP_PROJECT_APPROVAL_CHAIN            FINAL_YN                        VARCHAR2                  4 N           
+SP_PROJECT_APPROVAL_CHAIN            CREATED                         DATE                      7 N           
+SP_PROJECT_APPROVAL_CHAIN            CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_APPROVAL_CHAIN            UPDATED                         DATE                      7 N           
+SP_PROJECT_APPROVAL_CHAIN            UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_COMMENTS                  ID                              NUMBER                   22 N           
+SP_PROJECT_COMMENTS                  PROJECT_ID                      NUMBER                   22 Y           
+SP_PROJECT_COMMENTS                  BODY                            CLOB                   4000 Y           
+SP_PROJECT_COMMENTS                  BODY_HTML                       CLOB                   4000 Y           
+SP_PROJECT_COMMENTS                  BODY_NO_IMAGES                  CLOB                   4000 Y           
+SP_PROJECT_COMMENTS                  IMAGE_REF_ID                    NUMBER                   22 Y           
+SP_PROJECT_COMMENTS                  PRIVATE_YN                      VARCHAR2                  4 N           
+SP_PROJECT_COMMENTS                  AUTHOR_ID                       NUMBER                   22 Y           
+SP_PROJECT_COMMENTS                  CREATED                         DATE                      7 N           
+SP_PROJECT_COMMENTS                  CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_COMMENTS                  UPDATED                         DATE                      7 N           
+SP_PROJECT_COMMENTS                  UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_COMMENTS_EMAILS           ID                              NUMBER                   22 N           
+SP_PROJECT_COMMENTS_EMAILS           COMMENT_ID                      NUMBER                   22 Y           
+SP_PROJECT_COMMENTS_EMAILS           EMAIL                           VARCHAR2               1020 Y           
+SP_PROJECT_COMMENTS_V                ID                              NUMBER                   22 N           
+SP_PROJECT_COMMENTS_V                PROJECT_ID                      NUMBER                   22 Y           
+SP_PROJECT_COMMENTS_V                BODY                            CLOB                  32600 Y           
+SP_PROJECT_COMMENTS_V                BODY_HTML                       CLOB                  32600 Y           
+SP_PROJECT_COMMENTS_V                BODY_NO_IMAGES                  CLOB                   4000 Y           
+SP_PROJECT_COMMENTS_V                AUTHOR_ID                       NUMBER                   22 Y           
+SP_PROJECT_COMMENTS_V                PRIVATE_YN                      VARCHAR2                  4 N           
+SP_PROJECT_COMMENTS_V                IMAGE_REF_ID                    NUMBER                   22 Y           
+SP_PROJECT_COMMENTS_V                CREATED                         DATE                      7 N           
+SP_PROJECT_COMMENTS_V                CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_COMMENTS_V                UPDATED                         DATE                      7 N           
+SP_PROJECT_COMMENTS_V                UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_CONTRIBUTORS              ID                              NUMBER                   22 N           
+SP_PROJECT_CONTRIBUTORS              PROJECT_ID                      NUMBER                   22 Y           
+SP_PROJECT_CONTRIBUTORS              TEAM_MEMBER_ID                  NUMBER                   22 Y           
+SP_PROJECT_CONTRIBUTORS              RESPONSIBILITY_ID               NUMBER                   22 Y           
+SP_PROJECT_CONTRIBUTORS              RESPONSIBILITY                  VARCHAR2              16000 Y           
+SP_PROJECT_CONTRIBUTORS              TAGS                            VARCHAR2              16000 Y           
+SP_PROJECT_CONTRIBUTORS              CREATED                         DATE                      7 N           
+SP_PROJECT_CONTRIBUTORS              CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_CONTRIBUTORS              UPDATED                         DATE                      7 N           
+SP_PROJECT_CONTRIBUTORS              UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_DOCUMENTS                 ID                              NUMBER                   22 N           
+SP_PROJECT_DOCUMENTS                 PROJECT_ID                      NUMBER                   22 Y           
+SP_PROJECT_DOCUMENTS                 DOCUMENT_BLOB                   BLOB                   4000 Y           
+SP_PROJECT_DOCUMENTS                 DOCUMENT_FILENAME               VARCHAR2               2048 Y           
+SP_PROJECT_DOCUMENTS                 DOCUMENT_MIMETYPE               VARCHAR2               2048 Y           
+SP_PROJECT_DOCUMENTS                 DOCUMENT_CHARSET                VARCHAR2               2048 Y           
+SP_PROJECT_DOCUMENTS                 DOCUMENT_LASTUPD                DATE                      7 Y           
+SP_PROJECT_DOCUMENTS                 IMPORTANT_YN                    VARCHAR2                  4 Y           
+SP_PROJECT_DOCUMENTS                 DOC_DESCRIPTION                 VARCHAR2              16000 Y           
+SP_PROJECT_DOCUMENTS                 TAGS                            VARCHAR2              16000 Y           
+SP_PROJECT_DOCUMENTS                 CREATED                         DATE                      7 N           
+SP_PROJECT_DOCUMENTS                 CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_DOCUMENTS                 UPDATED                         DATE                      7 N           
+SP_PROJECT_DOCUMENTS                 UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_GROUPS                    ID                              NUMBER                   22 N           
+SP_PROJECT_GROUPS                    GROUP_NAME                      VARCHAR2               1020 N           
+SP_PROJECT_GROUPS                    GROUP_DESCRIPTION               VARCHAR2              16000 Y           
+SP_PROJECT_GROUPS                    IS_ACTIVE_YN                    VARCHAR2                  4 N           
+SP_PROJECT_GROUPS                    CREATED                         DATE                      7 Y           
+SP_PROJECT_GROUPS                    CREATED_BY                      VARCHAR2               1020 Y           
+SP_PROJECT_GROUPS                    UPDATED                         DATE                      7 Y           
+SP_PROJECT_GROUPS                    UPDATED_BY                      VARCHAR2               1020 Y           
+SP_PROJECT_HISTORY                   ID                              NUMBER                   22 N           
+SP_PROJECT_HISTORY                   PROJECT_ID                      NUMBER                   22 Y           
+SP_PROJECT_HISTORY                   ATTRIBUTE_COLUMN                VARCHAR2               1020 N           
+SP_PROJECT_HISTORY                   CHANGE_TYPE                     VARCHAR2                120 N           
+SP_PROJECT_HISTORY                   OLD_VALUE                       VARCHAR2              16000 Y           
+SP_PROJECT_HISTORY                   NEW_VALUE                       VARCHAR2              16000 Y           
+SP_PROJECT_HISTORY                   OLD_VALUE_CLOB                  CLOB                   4000 Y           
+SP_PROJECT_HISTORY                   NEW_VALUE_CLOB                  CLOB                   4000 Y           
+SP_PROJECT_HISTORY                   CHANGED_ON                      DATE                      7 N           
+SP_PROJECT_HISTORY                   CHANGED_BY                      VARCHAR2               1020 Y           
+SP_PROJECT_LINKS                     ID                              NUMBER                   22 N           
+SP_PROJECT_LINKS                     PROJECT_ID                      NUMBER                   22 Y           
+SP_PROJECT_LINKS                     LINK_NAME                       VARCHAR2               1020 N           
+SP_PROJECT_LINKS                     LINK_URL                        VARCHAR2              16000 N           
+SP_PROJECT_LINKS                     IMPORTANT_YN                    VARCHAR2                  4 N           
+SP_PROJECT_LINKS                     CREATED                         DATE                      7 N           
+SP_PROJECT_LINKS                     CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_LINKS                     UPDATED                         DATE                      7 N           
+SP_PROJECT_LINKS                     UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_PRIORITIES                ID                              NUMBER                   22 N           
+SP_PROJECT_PRIORITIES                PRIORITY                        NUMBER                   22 N           
+SP_PROJECT_PRIORITIES                DESCRIPTION                     VARCHAR2                160 N           
+SP_PROJECT_PRIORITIES                IS_DEFAULT_YN                   VARCHAR2                  4 Y           
+SP_PROJECT_PRIORITIES                CREATED                         DATE                      7 N           
+SP_PROJECT_PRIORITIES                CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_PRIORITIES                UPDATED                         DATE                      7 N           
+SP_PROJECT_PRIORITIES                UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_RELATED                   ID                              NUMBER                   22 N           
+SP_PROJECT_RELATED                   PROJECT_ID                      NUMBER                   22 N           
+SP_PROJECT_RELATED                   RELATED_PROJECT_ID              NUMBER                   22 N           
+SP_PROJECT_RELATED                   PROJECT_RELATION                VARCHAR2              16000 Y           
+SP_PROJECT_RELATED                   RELATION_TYPE                   VARCHAR2                120 Y           
+SP_PROJECT_RELATED                   CREATED                         DATE                      7 N           
+SP_PROJECT_RELATED                   CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_RELATED                   UPDATED                         DATE                      7 N           
+SP_PROJECT_RELATED                   UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_SCALES                    SCALE_LETTER                    VARCHAR2                  4 N           
+SP_PROJECT_SCALES                    SCALE_NAME                      VARCHAR2                200 N           
+SP_PROJECT_SCALES                    IS_ACTIVE_YN                    VARCHAR2                  4 N           
+SP_PROJECT_SCALES                    MIN_PC_FOR_STATUS               NUMBER                   22 Y           
+SP_PROJECT_SCALES                    PC0_LABEL                       VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC0_DESC                        VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    PC10_LABEL                      VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC10_DESC                       VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    PC20_LABEL                      VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC20_DESC                       VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    PC30_LABEL                      VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC30_DESC                       VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    PC40_LABEL                      VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC40_DESC                       VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    PC50_LABEL                      VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC50_DESC                       VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    PC60_LABEL                      VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC60_DESC                       VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    PC70_LABEL                      VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC70_DESC                       VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    PC80_LABEL                      VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC80_DESC                       VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    PC90_LABEL                      VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC90_DESC                       VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    PC100_LABEL                     VARCHAR2                240 Y           
+SP_PROJECT_SCALES                    PC100_DESC                      VARCHAR2              16000 Y           
+SP_PROJECT_SCALES                    CREATED                         DATE                      7 N           
+SP_PROJECT_SCALES                    CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_SCALES                    UPDATED                         DATE                      7 N           
+SP_PROJECT_SCALES                    UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_SIZES                     ID                              NUMBER                   22 N           
+SP_PROJECT_SIZES                     PROJECT_SIZE                    VARCHAR2                120 N           
+SP_PROJECT_SIZES                     SIZE_DESCRIPTION                VARCHAR2                400 N           
+SP_PROJECT_SIZES                     EFFORT_DAYS                     NUMBER                   22 N           
+SP_PROJECT_SIZES                     INCLUDE_YN                      VARCHAR2                  4 N           
+SP_PROJECT_SIZES                     CREATED                         DATE                      7 N           
+SP_PROJECT_SIZES                     CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_SIZES                     UPDATED                         DATE                      7 N           
+SP_PROJECT_SIZES                     UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_STATUSES                  ID                              NUMBER                   22 N           
+SP_PROJECT_STATUSES                  STATUS                          VARCHAR2                400 N           
+SP_PROJECT_STATUSES                  STATIC_ID                       VARCHAR2                120 N           
+SP_PROJECT_STATUSES                  DISPLAY_SEQ                     NUMBER                   22 Y           
+SP_PROJECT_STATUSES                  INCLUDE_YN                      VARCHAR2                  4 N           
+SP_PROJECT_STATUSES                  CREATED                         DATE                      7 N           
+SP_PROJECT_STATUSES                  CREATED_BY                      VARCHAR2               1020 N           
+SP_PROJECT_STATUSES                  UPDATED                         DATE                      7 N           
+SP_PROJECT_STATUSES                  UPDATED_BY                      VARCHAR2               1020 N           
+SP_PROJ_INTERACTIONS_LOG             ID                              NUMBER                   22 N           
+SP_PROJ_INTERACTIONS_LOG             PROJECT_ID                      NUMBER                   22 Y           
+SP_PROJ_INTERACTIONS_LOG             APP_PAGE                        NUMBER                   22 N           
+SP_PROJ_INTERACTIONS_LOG             APP_USER                        VARCHAR2               1020 N           
+SP_PROJ_INTERACTIONS_LOG             ACTION                          VARCHAR2                200 N           
+SP_PROJ_INTERACTIONS_LOG             PAGE_RENDERED                   DATE                      7 Y           
+SP_RELEASE_AI_SUMMARIES              ID                              NUMBER                   22 N           
+SP_RELEASE_AI_SUMMARIES              RELEASE_ID                      NUMBER                   22 Y           
+SP_RELEASE_AI_SUMMARIES              PROMPT_SENT                     CLOB                   4000 Y           
+SP_RELEASE_AI_SUMMARIES              DETAILS_SENT                    CLOB                   4000 Y           
+SP_RELEASE_AI_SUMMARIES              DATA_RECEIVED                   CLOB                   4000 Y           
+SP_RELEASE_AI_SUMMARIES              SUMMARY                         CLOB                   4000 Y           
+SP_RELEASE_AI_SUMMARIES              HIGHLIGHTS                      VARCHAR2               4000 Y           
+SP_RELEASE_AI_SUMMARIES              CREATED                         DATE                      7 N           
+SP_RELEASE_COMMENTS                  ID                              NUMBER                   22 N           
+SP_RELEASE_COMMENTS                  RELEASE_ID                      NUMBER                   22 Y           
+SP_RELEASE_COMMENTS                  BODY                            CLOB                   4000 Y           
+SP_RELEASE_COMMENTS                  BODY_HTML                       CLOB                   4000 Y           
+SP_RELEASE_COMMENTS                  BODY_NO_IMAGES                  CLOB                   4000 Y           
+SP_RELEASE_COMMENTS                  IMAGE_REF_ID                    NUMBER                   22 Y           
+SP_RELEASE_COMMENTS                  AUTHOR_ID                       NUMBER                   22 Y           
+SP_RELEASE_COMMENTS                  PRIVATE_YN                      VARCHAR2                  4 Y           
+SP_RELEASE_COMMENTS                  CREATED                         DATE                      7 N           
+SP_RELEASE_COMMENTS                  CREATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_COMMENTS                  UPDATED                         DATE                      7 N           
+SP_RELEASE_COMMENTS                  UPDATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_COMMENTS_V                ID                              NUMBER                   22 N           
+SP_RELEASE_COMMENTS_V                RELEASE_ID                      NUMBER                   22 Y           
+SP_RELEASE_COMMENTS_V                BODY                            CLOB                  32600 Y           
+SP_RELEASE_COMMENTS_V                BODY_HTML                       CLOB                  32600 Y           
+SP_RELEASE_COMMENTS_V                BODY_NO_IMAGES                  CLOB                   4000 Y           
+SP_RELEASE_COMMENTS_V                AUTHOR_ID                       NUMBER                   22 Y           
+SP_RELEASE_COMMENTS_V                PRIVATE_YN                      VARCHAR2                  4 Y           
+SP_RELEASE_COMMENTS_V                IMAGE_REF_ID                    NUMBER                   22 Y           
+SP_RELEASE_COMMENTS_V                CREATED                         DATE                      7 N           
+SP_RELEASE_COMMENTS_V                CREATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_COMMENTS_V                UPDATED                         DATE                      7 N           
+SP_RELEASE_COMMENTS_V                UPDATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_DOCUMENTS                 ID                              NUMBER                   22 N           
+SP_RELEASE_DOCUMENTS                 RELEASE_ID                      NUMBER                   22 Y           
+SP_RELEASE_DOCUMENTS                 DOCUMENT_BLOB                   BLOB                   4000 Y           
+SP_RELEASE_DOCUMENTS                 DOCUMENT_FILENAME               VARCHAR2               2048 Y           
+SP_RELEASE_DOCUMENTS                 DOCUMENT_MIMETYPE               VARCHAR2               2048 Y           
+SP_RELEASE_DOCUMENTS                 DOCUMENT_CHARSET                VARCHAR2               2048 Y           
+SP_RELEASE_DOCUMENTS                 DOCUMENT_LASTUPD                DATE                      7 Y           
+SP_RELEASE_DOCUMENTS                 IMPORTANT_YN                    VARCHAR2                  4 Y           
+SP_RELEASE_DOCUMENTS                 DOC_DESCRIPTION                 VARCHAR2              16000 Y           
+SP_RELEASE_DOCUMENTS                 TAGS                            VARCHAR2              16000 Y           
+SP_RELEASE_DOCUMENTS                 CREATED                         DATE                      7 N           
+SP_RELEASE_DOCUMENTS                 CREATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_DOCUMENTS                 UPDATED                         DATE                      7 N           
+SP_RELEASE_DOCUMENTS                 UPDATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_HISTORY                   ID                              NUMBER                   22 N           
+SP_RELEASE_HISTORY                   RELEASE_ID                      NUMBER                   22 Y           
+SP_RELEASE_HISTORY                   ATTRIBUTE_COLUMN                VARCHAR2               1020 N           
+SP_RELEASE_HISTORY                   CHANGE_TYPE                     VARCHAR2                120 N           
+SP_RELEASE_HISTORY                   OLD_VALUE                       VARCHAR2              16000 Y           
+SP_RELEASE_HISTORY                   NEW_VALUE                       VARCHAR2              16000 Y           
+SP_RELEASE_HISTORY                   OLD_VALUE_CLOB                  CLOB                   4000 Y           
+SP_RELEASE_HISTORY                   NEW_VALUE_CLOB                  CLOB                   4000 Y           
+SP_RELEASE_HISTORY                   CHANGED_ON                      DATE                      7 N           
+SP_RELEASE_HISTORY                   CHANGED_BY                      VARCHAR2               1020 Y           
+SP_RELEASE_LINKS                     ID                              NUMBER                   22 N           
+SP_RELEASE_LINKS                     RELEASE_ID                      NUMBER                   22 Y           
+SP_RELEASE_LINKS                     LINK_NAME                       VARCHAR2               1020 N           
+SP_RELEASE_LINKS                     LINK_URL                        VARCHAR2              16000 Y           
+SP_RELEASE_LINKS                     IMPORTANT_YN                    VARCHAR2                  4 N           
+SP_RELEASE_LINKS                     CREATED                         DATE                      7 N           
+SP_RELEASE_LINKS                     CREATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_LINKS                     UPDATED                         DATE                      7 N           
+SP_RELEASE_LINKS                     UPDATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_MILESTONES                ID                              NUMBER                   22 N           
+SP_RELEASE_MILESTONES                RELEASE_ID                      NUMBER                   22 N           
+SP_RELEASE_MILESTONES                MILESTONE_NAME                  VARCHAR2               1020 N           
+SP_RELEASE_MILESTONES                UPPER_MILESTONE_NAME            VARCHAR2               1020 N           
+SP_RELEASE_MILESTONES                MILESTONE_TYPE_ID               NUMBER                   22 Y           
+SP_RELEASE_MILESTONES                MILESTONE_START_DATE            DATE                      7 Y           
+SP_RELEASE_MILESTONES                MILESTONE_DATE                  DATE                      7 N           
+SP_RELEASE_MILESTONES                ORIGINAL_MILESTONE_DATE         DATE                      7 Y           
+SP_RELEASE_MILESTONES                MILESTONE_COMPLETED_YN          VARCHAR2                  4 N           
+SP_RELEASE_MILESTONES                MILESTONE_DESCRIPTION           VARCHAR2              16000 Y           
+SP_RELEASE_MILESTONES                TAGS                            VARCHAR2               4000 Y           
+SP_RELEASE_MILESTONES                CREATED                         DATE                      7 N           
+SP_RELEASE_MILESTONES                CREATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_MILESTONES                UPDATED                         DATE                      7 N           
+SP_RELEASE_MILESTONES                UPDATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_MILESTONE_DEFAULT_TAGS    ID                              NUMBER                   22 N           
+SP_RELEASE_MILESTONE_DEFAULT_TAGS    DISPLAY_SEQUENCE                NUMBER                   22 N           
+SP_RELEASE_MILESTONE_DEFAULT_TAGS    TAG                             VARCHAR2                120 N           
+SP_RELEASE_MILESTONE_DEFAULT_TAGS    DESCRIPTION                     VARCHAR2               2048 Y           
+SP_RELEASE_MILESTONE_DEFAULT_TAGS    CREATED                         DATE                      7 N           
+SP_RELEASE_MILESTONE_DEFAULT_TAGS    CREATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_MILESTONE_DEFAULT_TAGS    UPDATED                         DATE                      7 N           
+SP_RELEASE_MILESTONE_DEFAULT_TAGS    UPDATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_MILESTONE_TYPES           ID                              NUMBER                   22 N           
+SP_RELEASE_MILESTONE_TYPES           MILESTONE_TYPE                  VARCHAR2                240 N           
+SP_RELEASE_MILESTONE_TYPES           INCLUDE_YN                      VARCHAR2                  4 N           
+SP_RELEASE_MILESTONE_TYPES           DISPLAY_SEQ                     NUMBER                   22 Y           
+SP_RELEASE_MILESTONE_TYPES           CALENDAR_EVENT_COLOR            VARCHAR2                 30 Y           
+SP_RELEASE_MILESTONE_TYPES           CREATED                         DATE                      7 N           
+SP_RELEASE_MILESTONE_TYPES           CREATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_MILESTONE_TYPES           UPDATED                         DATE                      7 N           
+SP_RELEASE_MILESTONE_TYPES           UPDATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_TRAINS                    ID                              NUMBER                   22 N           
+SP_RELEASE_TRAINS                    RELEASE_TRAIN                   VARCHAR2                200 N           
+SP_RELEASE_TRAINS                    RELEASE_OWNER_ID                NUMBER                   22 Y           
+SP_RELEASE_TRAINS                    RELEASE                         VARCHAR2                120 N           
+SP_RELEASE_TRAINS                    RELEASE_TARGET_DATE             DATE                      7 Y           
+SP_RELEASE_TRAINS                    RELEASE_OPEN_DATE               DATE                      7 Y           
+SP_RELEASE_TRAINS                    RELEASE_DISTRIBUTION_URL        VARCHAR2              16000 Y           
+SP_RELEASE_TRAINS                    RELEASE_MANAGEMENT_URL          VARCHAR2              16000 Y           
+SP_RELEASE_TRAINS                    DESCRIPTION                     CLOB                   4000 Y           
+SP_RELEASE_TRAINS                    RELEASE_OPEN_COMPLETED          VARCHAR2                  4 N           
+SP_RELEASE_TRAINS                    RELEASE_COMPLETED               VARCHAR2                  4 N           
+SP_RELEASE_TRAINS                    RELEASE_TYPE                    VARCHAR2                200 Y           
+SP_RELEASE_TRAINS                    CREATED                         DATE                      7 N           
+SP_RELEASE_TRAINS                    CREATED_BY                      VARCHAR2               1020 N           
+SP_RELEASE_TRAINS                    UPDATED                         DATE                      7 N           
+SP_RELEASE_TRAINS                    UPDATED_BY                      VARCHAR2               1020 N           
+SP_REPORT_QUESTIONS                  ID                              NUMBER                   22 N           
+SP_REPORT_QUESTIONS                  PAGE_ID                         NUMBER                   22 N           
+SP_REPORT_QUESTIONS                  QUESTION                        VARCHAR2               4000 N           
+SP_REPORT_QUESTIONS                  CREATED                         DATE                      7 N           
+SP_REPORT_QUESTIONS                  CREATED_BY                      VARCHAR2                255 N           
+SP_REPORT_QUESTIONS                  UPDATED                         DATE                      7 N           
+SP_REPORT_QUESTIONS                  UPDATED_BY                      VARCHAR2                255 N           
+SP_RESOURCE_TYPES                    ID                              NUMBER                   22 N           
+SP_RESOURCE_TYPES                    RESOURCE_TYPE                   VARCHAR2                200 N           
+SP_RESOURCE_TYPES                    UPPER_RESOURCE_TYPE             VARCHAR2                200 N           
+SP_RESOURCE_TYPES                    RESOURCE_DESCRIPTION            VARCHAR2              16000 Y           
+SP_RESOURCE_TYPES                    IS_DEFAULT_YN                   VARCHAR2                  4 Y           
+SP_RESOURCE_TYPES                    CREATED                         DATE                      7 N           
+SP_RESOURCE_TYPES                    CREATED_BY                      VARCHAR2               1020 N           
+SP_RESOURCE_TYPES                    UPDATED                         DATE                      7 N           
+SP_RESOURCE_TYPES                    UPDATED_BY                      VARCHAR2               1020 N           
+SP_TASKS                             ID                              NUMBER                   22 N           
+SP_TASKS                             PROJECT_ID                      NUMBER                   22 N           
+SP_TASKS                             TASK                            VARCHAR2               1020 Y           
+SP_TASKS                             TASK_TYPE_ID                    NUMBER                   22 N           
+SP_TASKS                             TASK_SUB_TYPE_ID                NUMBER                   22 Y           
+SP_TASKS                             OWNER_ID                        NUMBER                   22 Y           
+SP_TASKS                             START_DATE                      DATE                      7 Y           
+SP_TASKS                             TARGET_COMPLETE                 DATE                      7 Y           
+SP_TASKS                             STATUS_ID                       NUMBER                   22 N           
+SP_TASKS                             STATUS_LAST_CHANGED_ON          DATE                      7 Y           
+SP_TASKS                             DESCRIPTION                     VARCHAR2              16000 Y           
+SP_TASKS                             TAGS                            VARCHAR2              16000 Y           
+SP_TASKS                             IMPACT                          VARCHAR2                120 Y           
+SP_TASKS                             CREATED                         DATE                      7 N           
+SP_TASKS                             CREATED_BY                      VARCHAR2               1020 N           
+SP_TASKS                             UPDATED                         DATE                      7 N           
+SP_TASKS                             UPDATED_BY                      VARCHAR2               1020 N           
+SP_TASK_COMMENTS                     ID                              NUMBER                   22 N           
+SP_TASK_COMMENTS                     TASK_ID                         NUMBER                   22 N           
+SP_TASK_COMMENTS                     BODY                            CLOB                   4000 Y           
+SP_TASK_COMMENTS                     BODY_HTML                       CLOB                   4000 Y           
+SP_TASK_COMMENTS                     BODY_NO_IMAGES                  CLOB                   4000 Y           
+SP_TASK_COMMENTS                     IMAGE_REF_ID                    NUMBER                   22 Y           
+SP_TASK_COMMENTS                     AUTHOR_ID                       NUMBER                   22 Y           
+SP_TASK_COMMENTS                     PRIVATE_YN                      VARCHAR2                  4 Y           
+SP_TASK_COMMENTS                     CREATED                         DATE                      7 N           
+SP_TASK_COMMENTS                     CREATED_BY                      VARCHAR2               1020 N           
+SP_TASK_COMMENTS                     UPDATED                         DATE                      7 N           
+SP_TASK_COMMENTS                     UPDATED_BY                      VARCHAR2               1020 N           
+SP_TASK_COMMENTS_V                   ID                              NUMBER                   22 N           
+SP_TASK_COMMENTS_V                   TASK_ID                         NUMBER                   22 N           
+SP_TASK_COMMENTS_V                   BODY                            CLOB                  32600 Y           
+SP_TASK_COMMENTS_V                   BODY_HTML                       CLOB                  32600 Y           
+SP_TASK_COMMENTS_V                   BODY_NO_IMAGES                  CLOB                   4000 Y           
+SP_TASK_COMMENTS_V                   AUTHOR_ID                       NUMBER                   22 Y           
+SP_TASK_COMMENTS_V                   PRIVATE_YN                      VARCHAR2                  4 Y           
+SP_TASK_COMMENTS_V                   IMAGE_REF_ID                    NUMBER                   22 Y           
+SP_TASK_COMMENTS_V                   CREATED                         DATE                      7 N           
+SP_TASK_COMMENTS_V                   CREATED_BY                      VARCHAR2               1020 N           
+SP_TASK_COMMENTS_V                   UPDATED                         DATE                      7 N           
+SP_TASK_COMMENTS_V                   UPDATED_BY                      VARCHAR2               1020 N           
+SP_TASK_DOCUMENTS                    ID                              NUMBER                   22 N           
+SP_TASK_DOCUMENTS                    TASK_ID                         NUMBER                   22 N           
+SP_TASK_DOCUMENTS                    DOCUMENT_BLOB                   BLOB                   4000 Y           
+SP_TASK_DOCUMENTS                    DOCUMENT_FILENAME               VARCHAR2               2048 Y           
+SP_TASK_DOCUMENTS                    DOCUMENT_MIMETYPE               VARCHAR2               2048 Y           
+SP_TASK_DOCUMENTS                    DOCUMENT_CHARSET                VARCHAR2               2048 Y           
+SP_TASK_DOCUMENTS                    DOCUMENT_LASTUPD                DATE                      7 Y           
+SP_TASK_DOCUMENTS                    IMPORTANT_YN                    VARCHAR2                  4 Y           
+SP_TASK_DOCUMENTS                    DOC_DESCRIPTION                 VARCHAR2              16000 Y           
+SP_TASK_DOCUMENTS                    TAGS                            VARCHAR2              16000 Y           
+SP_TASK_DOCUMENTS                    CREATED                         DATE                      7 N           
+SP_TASK_DOCUMENTS                    CREATED_BY                      VARCHAR2               1020 N           
+SP_TASK_DOCUMENTS                    UPDATED                         DATE                      7 N           
+SP_TASK_DOCUMENTS                    UPDATED_BY                      VARCHAR2               1020 N           
+SP_TASK_HISTORY                      ID                              NUMBER                   22 N           
+SP_TASK_HISTORY                      TASK_ID                         NUMBER                   22 N           
+SP_TASK_HISTORY                      ATTRIBUTE_COLUMN                VARCHAR2               1020 N           
+SP_TASK_HISTORY                      CHANGE_TYPE                     VARCHAR2                120 N           
+SP_TASK_HISTORY                      OLD_VALUE                       VARCHAR2              16000 Y           
+SP_TASK_HISTORY                      NEW_VALUE                       VARCHAR2              16000 Y           
+SP_TASK_HISTORY                      OLD_VALUE_CLOB                  CLOB                   4000 Y           
+SP_TASK_HISTORY                      NEW_VALUE_CLOB                  CLOB                   4000 Y           
+SP_TASK_HISTORY                      CHANGED_ON                      DATE                      7 N           
+SP_TASK_HISTORY                      CHANGED_BY                      VARCHAR2               1020 Y           
+SP_TASK_LINKS                        ID                              NUMBER                   22 N           
+SP_TASK_LINKS                        TASK_ID                         NUMBER                   22 N           
+SP_TASK_LINKS                        LINK_NAME                       VARCHAR2               1020 N           
+SP_TASK_LINKS                        LINK_URL                        VARCHAR2              16000 N           
+SP_TASK_LINKS                        IMPORTANT_YN                    VARCHAR2                  4 N           
+SP_TASK_LINKS                        CREATED                         DATE                      7 N           
+SP_TASK_LINKS                        CREATED_BY                      VARCHAR2               1020 N           
+SP_TASK_LINKS                        UPDATED                         DATE                      7 N           
+SP_TASK_LINKS                        UPDATED_BY                      VARCHAR2               1020 N           
+SP_TASK_STATUSES                     ID                              NUMBER                   22 N           
+SP_TASK_STATUSES                     TASK_TYPE_ID                    NUMBER                   22 N           
+SP_TASK_STATUSES                     STATUS                          VARCHAR2                400 N           
+SP_TASK_STATUSES                     STATIC_ID                       VARCHAR2                120 N           
+SP_TASK_STATUSES                     DISPLAY_SEQ                     NUMBER                   22 Y           
+SP_TASK_STATUSES                     INCLUDE_YN                      VARCHAR2                  4 N           
+SP_TASK_STATUSES                     IS_DEFAULT_YN                   VARCHAR2                  4 N           
+SP_TASK_STATUSES                     INDICATES_COMPLETE_YN           VARCHAR2                  4 N           
+SP_TASK_STATUSES                     CREATED                         DATE                      7 N           
+SP_TASK_STATUSES                     CREATED_BY                      VARCHAR2               1020 N           
+SP_TASK_STATUSES                     UPDATED                         DATE                      7 N           
+SP_TASK_STATUSES                     UPDATED_BY                      VARCHAR2               1020 N           
+SP_TASK_TYPES                        ID                              NUMBER                   22 N           
+SP_TASK_TYPES                        TASK_TYPE                       VARCHAR2                400 N           
+SP_TASK_TYPES                        STATIC_ID                       VARCHAR2                120 Y           
+SP_TASK_TYPES                        DESCRIPTION                     VARCHAR2              16000 Y           
+SP_TASK_TYPES                        DISPLAY_SEQ                     NUMBER                   22 Y           
+SP_TASK_TYPES                        INCLUDE_YN                      VARCHAR2                  4 N           
+SP_TASK_TYPES                        TASK_NAME_REQ_YN                VARCHAR2                  4 N           
+SP_TASK_TYPES                        PARENT_TYPE_ID                  NUMBER                   22 Y           
+SP_TASK_TYPES                        CREATED                         DATE                      7 N           
+SP_TASK_TYPES                        CREATED_BY                      VARCHAR2               1020 N           
+SP_TASK_TYPES                        UPDATED                         DATE                      7 N           
+SP_TASK_TYPES                        UPDATED_BY                      VARCHAR2               1020 N           
+SP_TEAM_MEMBERS                      ID                              NUMBER                   22 N           
+SP_TEAM_MEMBERS                      FIRST_NAME                      VARCHAR2               1020 N           
+SP_TEAM_MEMBERS                      LAST_NAME                       VARCHAR2               1020 N           
+SP_TEAM_MEMBERS                      INITIALS                        VARCHAR2                 12 N           
+SP_TEAM_MEMBERS                      SCREEN_NAME                     VARCHAR2                200 Y           
+SP_TEAM_MEMBERS                      EMAIL                           VARCHAR2               1020 N           
+SP_TEAM_MEMBERS                      EMAIL_DOMAIN                    VARCHAR2               1020 Y           
+SP_TEAM_MEMBERS                      NOTIFICATION_PREF               VARCHAR2               1020 Y           
+SP_TEAM_MEMBERS                      COMMENT_NOTIF_PREF              VARCHAR2               1020 Y           
+SP_TEAM_MEMBERS                      TAGS                            VARCHAR2              16000 Y           
+SP_TEAM_MEMBERS                      HASH_TAG_REFERENCE              VARCHAR2                120 Y           
+SP_TEAM_MEMBERS                      PHOTO                           BLOB                   4000 Y           
+SP_TEAM_MEMBERS                      PHOTO_FILENAME                  VARCHAR2               2048 Y           
+SP_TEAM_MEMBERS                      PHOTO_MIMETYPE                  VARCHAR2               2048 Y           
+SP_TEAM_MEMBERS                      PHOTO_CHARSET                   VARCHAR2               2048 Y           
+SP_TEAM_MEMBERS                      PHOTO_LASTUPD                   DATE                      7 Y           
+SP_TEAM_MEMBERS                      IS_CURRENT_YN                   VARCHAR2                  4 Y           
+SP_TEAM_MEMBERS                      AUTO_CREATED_YN                 VARCHAR2                  4 Y           
+SP_TEAM_MEMBERS                      LOCATION                        VARCHAR2               2000 Y           
+SP_TEAM_MEMBERS                      COUNTRY_ID                      NUMBER                   22 Y           
+SP_TEAM_MEMBERS                      APP_ROLE                        VARCHAR2               1020 Y           
+SP_TEAM_MEMBERS                      COMPETENCIES                    VARCHAR2              16000 Y           
+SP_TEAM_MEMBERS                      CREATED                         DATE                      7 N           
+SP_TEAM_MEMBERS                      CREATED_BY                      VARCHAR2               1020 N           
+SP_TEAM_MEMBERS                      UPDATED                         DATE                      7 N           
+SP_TEAM_MEMBERS                      UPDATED_BY                      VARCHAR2               1020 N           
+SP_TEAM_MEMBER_NOTIFICATIONS         ID                              NUMBER                   22 N           
+SP_TEAM_MEMBER_NOTIFICATIONS         TEAM_MEMBER_ID                  NUMBER                   22 N           
+SP_TEAM_MEMBER_NOTIFICATIONS         NOTIFICATION_PREF               VARCHAR2                255 Y           
+SP_TEAM_MEMBER_NOTIFICATIONS         TITLE                           VARCHAR2                255 N           
+SP_TEAM_MEMBER_NOTIFICATIONS         EMAIL_CONTENTS                  VARCHAR2              16000 Y           
+SP_TEAM_MEMBER_NOTIFICATIONS         NOTIFICATION_TYPE               VARCHAR2                120 Y           
+SP_TEAM_MEMBER_NOTIFICATIONS         PROJECT_ID                      NUMBER                   22 Y           
+SP_TEAM_MEMBER_NOTIFICATIONS         TASK_ID                         NUMBER                   22 Y           
+SP_TEAM_MEMBER_NOTIFICATIONS         RELEASE_ID                      NUMBER                   22 Y           
+SP_TEAM_MEMBER_NOTIFICATIONS         INITIATIVE_ID                   NUMBER                   22 Y           
+SP_TEAM_MEMBER_NOTIFICATIONS         DISMISSED_YN                    VARCHAR2                  4 N           
+SP_TEAM_MEMBER_NOTIFICATIONS         CREATED                         DATE                      7 N           
+SP_TEAM_MEMBER_NOTIFICATIONS         CREATED_BY                      VARCHAR2               1020 N           
+SP_TEAM_MEMBER_NOTIFICATIONS         UPDATED                         DATE                      7 N           
+SP_TEAM_MEMBER_NOTIFICATIONS         UPDATED_BY                      VARCHAR2               1020 N           
+
+919 rows selected. 
+
+=== COMPUTATIONS ===
+
+Error starting at line : 26 in command -
+SELECT page_id, computation_item, computation_point, computation_type, SUBSTR(computation, 1, 300) AS computation FROM apex_application_page_comp WHERE application_id = 102 ORDER BY page_id
+Error at Command Line : 26 Column : 17
+Error report -
+SQL Error: ORA-00904: "COMPUTATION_ITEM": invalid identifier
+
+https://docs.oracle.com/error-help/db/ora-00904/00904. 00000 -  "%s: invalid identifier"
+*Cause:    The identifier or column name entered was invalid.
+*Action:   Ensure the following
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-00904/
+=== PAGE GROUPS ===
+
+[1mPAGE_GROUP[m                  
+___________________________ 
+About App                   
+Activities                  
+Administration              
+Administrative Utilities    
+Areas                       
+Cross-Project Reports       
+Feedback                    
+Groups                      
+Home                        
+Initiatives                 
+Login                       
+Projects                    
+Releases                    
+Reporting                   
+Users                       
+
+15 rows selected. 
+
+=== FIX2 COMPLETE ===
+Disconnected from Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.30.0.1.0
