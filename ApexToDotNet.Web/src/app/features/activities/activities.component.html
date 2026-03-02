@@ -1,0 +1,189 @@
+<div class="activities-container">
+  <!-- Header -->
+  <div class="activities-header">
+    <div class="header-top">
+      <button class="back-btn">↑</button>
+      <h1>Activities</h1>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="search-section">
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Search..."
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()"
+        />
+      </div>
+      <button class="filter-toggle-btn">☰</button>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="activities-content">
+    <!-- Left Sidebar - Filters -->
+    <aside class="filters-sidebar">
+      <div class="filters-panel">
+        <!-- Project Related Filter -->
+        <div class="filter-section">
+          <div class="filter-header">
+            <span class="filter-icon">▸</span>
+            <h3>Project Related</h3>
+            <button class="filter-menu">⋮</button>
+          </div>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" [(ngModel)]="filters.projectRelated.yes">
+              <span>Yes (3)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Timeframe Filter -->
+        <div class="filter-section">
+          <div class="filter-header">
+            <span class="filter-icon">▸</span>
+            <h3>Timeframe</h3>
+            <button class="filter-menu">⋮</button>
+          </div>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" [(ngModel)]="filters.timeframe.past">
+              <span class="past-badge">Past</span>
+              <span class="count">(3)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Owner Filter -->
+        <div class="filter-section">
+          <div class="filter-header">
+            <span class="filter-icon">▸</span>
+            <h3>Owner</h3>
+            <button class="filter-menu status-past">Past</button>
+          </div>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" [(ngModel)]="filters.owner.johnDoe">
+              <span>John Doe (2)</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" [(ngModel)]="filters.owner.janeDoe">
+              <span>Jane Doe (1)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Related Initiative Filter -->
+        <div class="filter-section">
+          <div class="filter-header">
+            <span class="filter-icon">▸</span>
+            <h3>Related Initiative</h3>
+            <button class="filter-menu">⋮</button>
+          </div>
+        </div>
+
+        <!-- Release Filter -->
+        <div class="filter-section">
+          <div class="filter-header">
+            <span class="filter-icon">▸</span>
+            <h3>Release</h3>
+            <button class="filter-menu">⋮</button>
+          </div>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" [(ngModel)]="filters.release.alphaR110">
+              <span>Alpha R110 (3)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Team Member Tags Filter -->
+        <div class="filter-section">
+          <div class="filter-header">
+            <span class="filter-icon">▸</span>
+            <h3>Team Member Tags</h3>
+            <button class="filter-menu">⋮</button>
+          </div>
+        </div>
+
+        <!-- Type Filter -->
+        <div class="filter-section">
+          <div class="filter-header">
+            <span class="filter-icon">▸</span>
+            <h3>Type</h3>
+            <button class="filter-menu">⋮</button>
+          </div>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" [(ngModel)]="filters.type.development">
+              <span>Development (2)</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" [(ngModel)]="filters.type.review">
+              <span>Review (1)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- My Activity Filter -->
+        <div class="filter-section">
+          <div class="filter-header">
+            <span class="filter-icon">▸</span>
+            <h3>My Activity</h3>
+            <button class="filter-menu">⋮</button>
+          </div>
+          <div class="filter-options">
+            <label class="filter-checkbox">
+              <input type="checkbox" [(ngModel)]="filters.myActivity.no">
+              <span>No (3)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Activities List -->
+    <main class="activities-main">
+      <div class="activities-list">
+        <div *ngFor="let activity of filteredActivities" class="activity-card">
+          <div class="activity-header">
+            <div class="activity-icon">👤</div>
+            <div class="activity-info">
+              <h3 class="activity-title">{{ activity.title }}</h3>
+              <div class="activity-meta">
+                <span class="meta-label">Owner:</span>
+                <span class="meta-value">{{ activity.owner }}</span>
+              </div>
+              <div class="activity-meta" *ngIf="activity.developmentStart">
+                <span class="meta-label">Development:</span>
+                <span class="meta-value">{{ formatDateRange(activity.developmentStart, activity.developmentEnd) }}</span>
+              </div>
+              <div class="activity-meta" *ngIf="activity.reviewStart">
+                <span class="meta-label">Review:</span>
+                <span class="meta-value">{{ formatDateRange(activity.reviewStart, activity.reviewEnd) }}</span>
+              </div>
+              <div class="activity-meta">
+                <span class="meta-label">Project:</span>
+                <span class="meta-value">{{ activity.project }}</span>
+              </div>
+            </div>
+            <div class="activity-badges">
+              <span [class]="getStatusBadgeClass(activity.status)">{{ activity.status }}</span>
+            </div>
+          </div>
+          <div class="activity-timestamp">6 days ago</div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="filteredActivities.length === 0" class="empty-state">
+          <span class="empty-icon">⚡</span>
+          <p>No activities found</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

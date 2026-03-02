@@ -1,17 +1,17 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { MainLayoutComponent } from './core/layout/main-layout/main-layout.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, MainLayoutComponent],
+  imports: [CommonModule, RouterOutlet],
   template: `
-    <app-main-layout></app-main-layout>
+    <h1>Welcome to ApexToDotNet Migration</h1>
+    <router-outlet></router-outlet>
   `,
   styles: [],
 })
 export class AppComponent {
-  title = 'Strategic Planner';
+  title = 'ApexToDotNet.Web';
 }

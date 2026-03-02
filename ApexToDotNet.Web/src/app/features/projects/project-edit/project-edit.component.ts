@@ -68,9 +68,9 @@ export class ProjectEditComponent implements OnInit {
     });
   }
 
-  private formatDate(date: Date | string | undefined): string {
-    if (!date) return '';
-    return new Date(date).toISOString().split('T')[0];
+  private formatDate(dateString: string): string {
+    if (!dateString) return '';
+    return new Date(dateString).toISOString().split('T')[0];
   }
 
   saveProject(): void {
