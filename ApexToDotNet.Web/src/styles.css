@@ -1,4 +1,8 @@
-/* Global Styles */
+/* ========================================
+   Oracle APEX Universal Theme - Faithful CSS
+   Based on APEX 24.2 "Redwood Light" theme
+   ======================================== */
+
 * {
   margin: 0;
   padding: 0;
@@ -6,8 +10,362 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Oracle Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  color: #333;
+  color: #1e1e1e;
+  background: #f5f5f5;
 }
+
+/* APEX-style page container */
+.apex-page {
+  padding: 16px 24px 24px;
+}
+
+/* APEX breadcrumb bar region */
+.apex-breadcrumb {
+  font-size: 12px;
+  color: #666;
+  padding: 8px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.apex-breadcrumb a {
+  color: #4a6785;
+  text-decoration: none;
+}
+
+.apex-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* APEX page title region */
+.apex-page-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.apex-page-title h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e1e1e;
+  margin: 0;
+}
+
+/* APEX region (card-style body region) */
+.apex-region {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  margin-bottom: 16px;
+}
+
+.apex-region-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.apex-region-header h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e1e1e;
+  margin: 0;
+}
+
+.apex-region-body {
+  padding: 16px;
+}
+
+/* APEX Interactive Report / Classic Report table */
+.apex-report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.apex-report-table thead th {
+  background: #fafafa;
+  border-bottom: 2px solid #e0e0e0;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #404040;
+  white-space: nowrap;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.apex-report-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+  vertical-align: middle;
+}
+
+.apex-report-table tbody tr:hover {
+  background: #f8f9ff;
+}
+
+/* APEX links in reports */
+.apex-report-table a {
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.apex-report-table a:hover {
+  text-decoration: underline;
+}
+
+/* APEX Buttons - matches Universal Theme */
+.apex-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+  line-height: 1.5;
+}
+
+.apex-btn-primary {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.apex-btn-primary:hover {
+  background: #1557b0;
+}
+
+.apex-btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #d0d0d0;
+}
+
+.apex-btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+.apex-btn-hot {
+  background: #c74634;
+  color: #fff;
+}
+
+.apex-btn-hot:hover {
+  background: #a33a2b;
+}
+
+.apex-btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+/* APEX badges (status pills) */
+.apex-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.apex-badge-green { background: #d4edda; color: #155724; }
+.apex-badge-blue { background: #cce5ff; color: #004085; }
+.apex-badge-yellow { background: #fff3cd; color: #856404; }
+.apex-badge-red { background: #f8d7da; color: #721c24; }
+.apex-badge-gray { background: #e9ecef; color: #495057; }
+
+/* APEX percent complete bar */
+.apex-pct-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apex-pct-track {
+  flex: 1;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.apex-pct-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.apex-pct-fill.pct-low { background: #dc3545; }
+.apex-pct-fill.pct-mid { background: #ffc107; }
+.apex-pct-fill.pct-high { background: #28a745; }
+.apex-pct-fill.pct-done { background: #17a2b8; }
+
+.apex-pct-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* APEX Cards region */
+.apex-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.apex-card {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  padding: 16px;
+  transition: box-shadow 0.15s;
+  cursor: pointer;
+}
+
+.apex-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.apex-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a73e8;
+  margin-bottom: 8px;
+}
+
+.apex-card-body {
+  font-size: 13px;
+  color: #555;
+}
+
+.apex-card-footer {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 12px;
+  color: #888;
+}
+
+/* APEX Form elements */
+.apex-form-group {
+  margin-bottom: 16px;
+}
+
+.apex-form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #404040;
+  margin-bottom: 4px;
+}
+
+.apex-form-group label.required::after {
+  content: ' *';
+  color: #c74634;
+}
+
+.apex-form-group input,
+.apex-form-group select,
+.apex-form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.apex-form-group input:focus,
+.apex-form-group select:focus,
+.apex-form-group textarea:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+  outline: none;
+}
+
+.apex-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* APEX Dialog footer (button bar) */
+.apex-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #e8e8e8;
+  background: #fafafa;
+}
+
+/* Faceted search sidebar */
+.apex-faceted-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+}
+
+.apex-facet-panel {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  padding: 16px;
+}
+
+.apex-facet-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+/* Loading spinner */
+.apex-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+  color: #888;
+}
+
+/* Empty state */
+.apex-empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  font-size: 14px;
+}
+
+/* APEX tag display */
+.apex-tag {
+  display: inline-block;
+  background: #e8eef5;
+  color: #4a6785;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  margin: 1px 2px;
+}
+

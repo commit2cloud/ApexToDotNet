@@ -1,29 +1,30 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StrategicPlannerService } from '../../services/strategic-planner.service';
-import { ProjectGroup } from '../../models/strategic-planner.models';
+import { PeopleGroup } from '../../models/strategic-planner.models';
 
 @Component({
-  selector: 'app-project-groups',
+  selector: 'app-people-groups',
   standalone: true,
   imports: [CommonModule],
   template: `
     <div class="apex-page">
       <div class="apex-page-title">
-        <h1>Project Groups</h1>
+        <h1>People Groups</h1>
       </div>
 
-      <div *ngIf="loading" class="apex-loading">Loading project groups...</div>
+      <div *ngIf="loading" class="apex-loading">Loading people groups...</div>
 
       <div *ngIf="!loading" class="t-Region">
-        <div class="t-Region-header"><h2>All Project Groups</h2></div>
+        <div class="t-Region-header"><h2>All People Groups</h2></div>
         <div class="t-Region-body">
           <table class="t-Report-report" *ngIf="groups.length > 0">
             <thead>
               <tr>
                 <th>Group Name</th>
                 <th>Description</th>
-                <th class="text-center">Projects</th>
+                <th>Tag</th>
+                <th class="text-center">Members</th>
                 <th>Updated</th>
               </tr>
             </thead>
@@ -32,9 +33,13 @@ import { ProjectGroup } from '../../models/strategic-planner.models';
                 <td>
                   <strong>{{ g.groupName }}</strong>
                 </td>
-                <td>{{ g.description || '—' }}</td>
+                <td>{{ g.groupDescription || '—' }}</td>
+                <td>
+                  <span *ngIf="g.groupTag" class="apex-tag">{{ g.groupTag }}</span>
+                  <span *ngIf="!g.groupTag">—</span>
+                </td>
                 <td class="text-center">
-                  <span class="apex-badge">{{ g.projects || 0 }}</span>
+                  <span class="apex-badge">{{ g.members || 0 }}</span>
                 </td>
                 <td>{{ g.updated | date:'mediumDate' }}</td>
               </tr>
@@ -42,9 +47,9 @@ import { ProjectGroup } from '../../models/strategic-planner.models';
           </table>
 
           <div *ngIf="groups.length === 0" class="apex-empty-state">
-            <p>No project groups defined yet.</p>
+            <p>No people groups defined yet.</p>
             <p style="color: #666; font-size: 0.9em;">
-              Project groups let you organize related projects together for reporting and tracking.
+              People groups let you organize team members into functional teams and committees.
             </p>
           </div>
         </div>
@@ -53,16 +58,24 @@ import { ProjectGroup } from '../../models/strategic-planner.models';
   `,
   styles: [`
     .text-center { text-align: center; }
+    .apex-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #e8eaf6;
+      color: #3f51b5;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
   `]
 })
-export class ProjectGroupsComponent implements OnInit {
-  groups: ProjectGroup[] = [];
+export class PeopleGroupsComponent implements OnInit {
+  groups: PeopleGroup[] = [];
   loading = true;
 
   constructor(private spService: StrategicPlannerService) {}
 
   ngOnInit(): void {
-    this.spService.getProjectGroups().subscribe({
+    this.spService.getPeopleGroups().subscribe({
       next: (data) => { this.groups = data; this.loading = false; },
       error: () => { this.loading = false; }
     });

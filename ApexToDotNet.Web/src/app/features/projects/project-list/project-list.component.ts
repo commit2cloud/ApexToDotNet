@@ -1,23 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ProjectService } from '../../../services/project.service';
-import { Project, Priority, Area, Initiative } from '../../../models/project';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { StrategicPlannerService } from '../../../services/strategic-planner.service';
-
-interface FilterState {
-  searchQuery: string;
-  selectedAreas: number[];
-  selectedInitiatives: number[];
-  selectedReleases: string[];
-  selectedOwners: string[];
-  selectedTags: string[];
-  selectedPriorities: Priority[];
-  selectedStatuses: string[];
-  showFavoritesOnly: boolean;
-  sortBy: string;
-}
+import { Project, ProjectStatus, ProjectPriority, Initiative, Area, Release, TeamMember } from '../../../models/strategic-planner.models';
 
 @Component({
   selector: 'app-project-list',
@@ -30,248 +16,195 @@ export class ProjectListComponent implements OnInit {
   projects: Project[] = [];
   filteredProjects: Project[] = [];
   isLoading = true;
-  
-  // Filter options
-  areas: Area[] = [];
-  initiatives: Initiative[] = [];
-  releases: string[] = [];
-  owners: string[] = [];
-  tags: string[] = [];
-  priorities = [Priority.P1, Priority.P2, Priority.P3, Priority.P4, Priority.P5];
-  statuses = ['Not Set', 'NA', 'Active', 'On Hold', 'Completed'];
-  
-  // Filter state
-  filters: FilterState = {
-    searchQuery: '',
-    selectedAreas: [],
-    selectedInitiatives: [],
-    selectedReleases: [],
-    selectedOwners: [],
-    selectedTags: [],
-    selectedPriorities: [],
-    selectedStatuses: [],
-    showFavoritesOnly: false,
-    sortBy: 'updatedDesc'
-  };
-  
-  // Sidebar collapse state
-  collapsedSections = {
-    area: false,
-    initiative: false,
-    release: false,
-    owner: false,
-    tags: false,
-    priority: false,
-    status: false,
-    projectGroup: false
-  };
 
-  constructor(
-    private projectService: ProjectService,
-    private plannerService: StrategicPlannerService
-  ) { }
+  // Faceted search filters
+  searchQuery = '';
+  statuses: ProjectStatus[] = [];
+  priorities: ProjectPriority[] = [];
+  initiatives: Initiative[] = [];
+  areas: Area[] = [];
+  releases: Release[] = [];
+  teamMembers: TeamMember[] = [];
+
+  // Derived facets from data
+  uniqueOwners: { name: string; count: number }[] = [];
+  uniqueTags: { tag: string; count: number }[] = [];
+
+  // Active filter selections
+  selectedStatuses: Set<string> = new Set();
+  selectedPriorities: Set<number> = new Set();
+  selectedInitiative: string | null = null;
+  selectedArea: string | null = null;
+  selectedRelease: string | null = null;
+  selectedOwners: Set<string> = new Set();
+  selectedTags: Set<string> = new Set();
+
+  constructor(private plannerService: StrategicPlannerService) {}
 
   ngOnInit(): void {
-    this.loadProjects();
-    this.loadFilterOptions();
+    this.loadData();
   }
 
-  loadProjects(): void {
-    this.projectService.getProjects().subscribe({
+  loadData(): void {
+    this.plannerService.getProjects().subscribe({
       next: (data) => {
         this.projects = data;
-        this.applyFilters();
+        this.filteredProjects = data;
         this.isLoading = false;
+        this.buildDerivedFacets();
       },
       error: (err) => {
         console.error('Error fetching projects', err);
         this.isLoading = false;
       }
     });
+
+    this.plannerService.getStatuses().subscribe(s => this.statuses = s);
+    this.plannerService.getPriorities().subscribe(p => this.priorities = p);
+    this.plannerService.getInitiatives().subscribe(i => this.initiatives = i);
+    this.plannerService.getAreas().subscribe(a => this.areas = a);
+    this.plannerService.getReleases().subscribe(r => this.releases = r);
+    this.plannerService.getTeamMembers().subscribe(t => this.teamMembers = t);
   }
-  
-  loadFilterOptions(): void {
-    // Load areas
-    this.plannerService.getAreas().subscribe({
-      next: (data) => this.areas = data,
-      error: (err) => console.error('Error loading areas', err)
+
+  buildDerivedFacets(): void {
+    // Build owner counts from project data
+    const ownerMap = new Map<string, number>();
+    this.projects.forEach(p => {
+      const owner = p.owner || '(No Owner)';
+      ownerMap.set(owner, (ownerMap.get(owner) || 0) + 1);
     });
-    
-    // Load initiatives
-    this.plannerService.getInitiatives().subscribe({
-      next: (data) => this.initiatives = data,
-      error: (err) => console.error('Error loading initiatives', err)
+    this.uniqueOwners = Array.from(ownerMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    // Build tag counts
+    const tagMap = new Map<string, number>();
+    this.projects.forEach(p => {
+      if (p.tags) {
+        p.tags.split(',').map(t => t.trim()).filter(t => t).forEach(tag => {
+          tagMap.set(tag, (tagMap.get(tag) || 0) + 1);
+        });
+      }
     });
-    
-    // Extract unique owners and tags from projects when loaded
-    // These would ideally come from the API
+    this.uniqueTags = Array.from(tagMap.entries())
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count);
   }
 
   applyFilters(): void {
-    let filtered = [...this.projects];
-    
-    // Search filter
-    if (this.filters.searchQuery) {
-      const query = this.filters.searchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name?.toLowerCase().includes(query) || 
-        p.description?.toLowerCase().includes(query)
+    let result = this.projects;
+
+    if (this.searchQuery) {
+      const q = this.searchQuery.toLowerCase();
+      result = result.filter(p =>
+        p.projectName.toLowerCase().includes(q) ||
+        (p.owner && p.owner.toLowerCase().includes(q)) ||
+        (p.initiative && p.initiative.toLowerCase().includes(q)) ||
+        (p.area && p.area.toLowerCase().includes(q))
       );
     }
-    
-    // Area filter
-    if (this.filters.selectedAreas.length > 0) {
-      filtered = filtered.filter(p => 
-        p.areaId && this.filters.selectedAreas.includes(p.areaId)
-      );
+
+    if (this.selectedArea) {
+      result = result.filter(p => p.area === this.selectedArea);
     }
-    
-    // Initiative filter
-    if (this.filters.selectedInitiatives.length > 0) {
-      filtered = filtered.filter(p => 
-        p.initiativeId && this.filters.selectedInitiatives.includes(p.initiativeId)
-      );
+
+    if (this.selectedInitiative) {
+      result = result.filter(p => p.initiative === this.selectedInitiative);
     }
-    
-    // Priority filter
-    if (this.filters.selectedPriorities.length > 0) {
-      filtered = filtered.filter(p => 
-        this.filters.selectedPriorities.includes(p.priority)
-      );
+
+    if (this.selectedRelease) {
+      result = result.filter(p => p.release === this.selectedRelease);
     }
-    
-    // Status filter
-    if (this.filters.selectedStatuses.length > 0) {
-      filtered = filtered.filter(p => 
-        p.status && this.filters.selectedStatuses.includes(p.status)
-      );
+
+    if (this.selectedOwners.size > 0) {
+      result = result.filter(p => p.owner && this.selectedOwners.has(p.owner));
     }
-    
-    // Sort
-    filtered = this.sortProjects(filtered, this.filters.sortBy);
-    
-    this.filteredProjects = filtered;
+
+    if (this.selectedTags.size > 0) {
+      result = result.filter(p => {
+        if (!p.tags) return false;
+        const projectTags = p.tags.split(',').map(t => t.trim());
+        return Array.from(this.selectedTags).some(t => projectTags.includes(t));
+      });
+    }
+
+    if (this.selectedPriorities.size > 0) {
+      result = result.filter(p => p.priorityId != null && this.selectedPriorities.has(p.priorityId));
+    }
+
+    if (this.selectedStatuses.size > 0) {
+      result = result.filter(p => p.status && this.selectedStatuses.has(p.status));
+    }
+
+    this.filteredProjects = result;
   }
-  
-  sortProjects(projects: Project[], sortBy: string): Project[] {
-    const sorted = [...projects];
-    
-    switch (sortBy) {
-      case 'updatedDesc':
-        return sorted.sort((a, b) => 
-          (b.updatedDate?.getTime() || 0) - (a.updatedDate?.getTime() || 0)
-        );
-      case 'updatedAsc':
-        return sorted.sort((a, b) => 
-          (a.updatedDate?.getTime() || 0) - (b.updatedDate?.getTime() || 0)
-        );
-      case 'nameAsc':
-        return sorted.sort((a, b) => 
-          (a.name || '').localeCompare(b.name || '')
-        );
-      case 'nameDesc':
-        return sorted.sort((a, b) => 
-          (b.name || '').localeCompare(a.name || '')
-        );
-      case 'priorityAsc':
-        return sorted.sort((a, b) => a.priority - b.priority);
-      case 'priorityDesc':
-        return sorted.sort((a, b) => b.priority - a.priority);
-      default:
-        return sorted;
-    }
-  }
-  
-  toggleFilter(filterType: 'area' | 'initiative' | 'priority' | 'status', value: any): void {
-    let filterArray: any[];
-    
-    switch (filterType) {
-      case 'area':
-        filterArray = this.filters.selectedAreas;
-        break;
-      case 'initiative':
-        filterArray = this.filters.selectedInitiatives;
-        break;
-      case 'priority':
-        filterArray = this.filters.selectedPriorities;
-        break;
-      case 'status':
-        filterArray = this.filters.selectedStatuses;
-        break;
-    }
-    
-    const index = filterArray.indexOf(value);
-    if (index > -1) {
-      filterArray.splice(index, 1);
+
+  toggleStatus(status: string): void {
+    if (this.selectedStatuses.has(status)) {
+      this.selectedStatuses.delete(status);
     } else {
-      filterArray.push(value);
+      this.selectedStatuses.add(status);
     }
-    
     this.applyFilters();
   }
-  
-  isFilterSelected(filterType: 'area' | 'initiative' | 'priority' | 'status', value: any): boolean {
-    switch (filterType) {
-      case 'area':
-        return this.filters.selectedAreas.includes(value);
-      case 'initiative':
-        return this.filters.selectedInitiatives.includes(value);
-      case 'priority':
-        return this.filters.selectedPriorities.includes(value);
-      case 'status':
-        return this.filters.selectedStatuses.includes(value);
-      default:
-        return false;
+
+  togglePriority(id: number): void {
+    if (this.selectedPriorities.has(id)) {
+      this.selectedPriorities.delete(id);
+    } else {
+      this.selectedPriorities.add(id);
     }
-  }
-  
-  toggleSection(section: keyof typeof this.collapsedSections): void {
-    this.collapsedSections[section] = !this.collapsedSections[section];
-  }
-  
-  clearAllFilters(): void {
-    this.filters = {
-      searchQuery: '',
-      selectedAreas: [],
-      selectedInitiatives: [],
-      selectedReleases: [],
-      selectedOwners: [],
-      selectedTags: [],
-      selectedPriorities: [],
-      selectedStatuses: [],
-      showFavoritesOnly: false,
-      sortBy: 'updatedDesc'
-    };
     this.applyFilters();
   }
-  
-  getFilterCount(): number {
-    return this.filters.selectedAreas.length +
-           this.filters.selectedInitiatives.length +
-           this.filters.selectedPriorities.length +
-           this.filters.selectedStatuses.length;
+
+  toggleOwner(name: string): void {
+    if (this.selectedOwners.has(name)) {
+      this.selectedOwners.delete(name);
+    } else {
+      this.selectedOwners.add(name);
+    }
+    this.applyFilters();
   }
-  
-  getPriorityLabel(priority: Priority): string {
-    return `P${priority}`;
+
+  toggleTag(tag: string): void {
+    if (this.selectedTags.has(tag)) {
+      this.selectedTags.delete(tag);
+    } else {
+      this.selectedTags.add(tag);
+    }
+    this.applyFilters();
   }
-  
-  getTimeSince(date?: Date): string {
-    if (!date) return '';
-    
-    const now = new Date();
-    const diff = now.getTime() - new Date(date).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
-    
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    return 'Just now';
+
+  get hasActiveFilters(): boolean {
+    return !!(this.searchQuery || this.selectedStatuses.size || this.selectedPriorities.size ||
+      this.selectedInitiative || this.selectedArea || this.selectedRelease ||
+      this.selectedOwners.size || this.selectedTags.size);
+  }
+
+  clearFilters(): void {
+    this.searchQuery = '';
+    this.selectedStatuses.clear();
+    this.selectedPriorities.clear();
+    this.selectedInitiative = null;
+    this.selectedArea = null;
+    this.selectedRelease = null;
+    this.selectedOwners.clear();
+    this.selectedTags.clear();
+    this.filteredProjects = this.projects;
+  }
+
+  getPctClass(pct: number | undefined): string {
+    if (!pct || pct === 0) return 'pct-low';
+    if (pct < 50) return 'pct-low';
+    if (pct < 80) return 'pct-mid';
+    if (pct < 100) return 'pct-high';
+    return 'pct-done';
   }
 
   deleteProject(id: number): void {
     if (confirm('Are you sure you want to delete this project?')) {
-      this.projectService.deleteProject(id).subscribe({
+      this.plannerService.deleteProject(id).subscribe({
         next: () => {
           this.projects = this.projects.filter(p => p.id !== id);
           this.applyFilters();

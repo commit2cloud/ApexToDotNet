@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ProjectService } from '../../../services/project.service';
 import { StrategicPlannerService } from '../../../services/strategic-planner.service';
-import { Project, Priority } from '../../../models/project';
+import { ProjectDetail } from '../../../models/strategic-planner.models';
 
 interface Comment {
   id: number;
@@ -32,7 +31,7 @@ interface Activity {
   styleUrls: ['./project-detail.component.css']
 })
 export class ProjectDetailComponent implements OnInit {
-  project: Project | null = null;
+  project: ProjectDetail | null = null;
   isLoading = true;
   activeTab = 'comments';
   
@@ -86,7 +85,6 @@ export class ProjectDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private projectService: ProjectService,
     private plannerService: StrategicPlannerService
   ) { }
 
@@ -100,12 +98,12 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   loadProject(id: number): void {
-    this.projectService.getProject(id).subscribe({
-      next: (data) => {
+    this.plannerService.getProject(id).subscribe({
+      next: (data: ProjectDetail) => {
         this.project = data;
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error fetching project', err);
         this.isLoading = false;
       }
@@ -138,12 +136,12 @@ export class ProjectDetailComponent implements OnInit {
     }
   }
 
-  getPriorityLabel(priority: Priority): string {
-    return `P${priority}`;
+  getPriorityLabel(priority: number | undefined): string {
+    return priority ? `P${priority}` : '';
   }
 
-  getPriorityClass(priority: Priority): string {
-    return `priority-${priority}`;
+  getPriorityClass(priority: number | undefined): string {
+    return `priority-${priority || 3}`;
   }
 
   getTimeSince(date: Date | undefined): string {

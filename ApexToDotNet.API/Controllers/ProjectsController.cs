@@ -1,178 +1,106 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using ApexToDotNet.API.Services;
-using static ApexToDotNet.API.Models.StrategicPlannerModels;
+using Microsoft.EntityFrameworkCore;
+using ApexToDotNet.API.Models;
 
 namespace ApexToDotNet.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class ProjectsController : ControllerBase
     {
-        private readonly OrdsApiClient _ordsClient;
-        private readonly ILogger<ProjectsController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public ProjectsController(OrdsApiClient ordsClient, ILogger<ProjectsController> logger)
+        public ProjectsController(ApplicationDbContext context)
         {
-            _ordsClient = ordsClient;
-            _logger = logger;
+            _context = context;
         }
 
+        // GET: api/Projects
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Project>>> GetProjects(
-            [FromQuery] int? areaId = null,
-            [FromQuery] int? priority = null,
-            [FromQuery] string? status = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 50)
+        public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
         {
-            try
-            {
-                // Build query parameters
-                var queryParams = new List<string>();
-                if (areaId.HasValue) queryParams.Add($"area_id={areaId.Value}");
-                if (priority.HasValue) queryParams.Add($"priority={priority.Value}");
-                if (!string.IsNullOrEmpty(status)) queryParams.Add($"status={status}");
-                queryParams.Add($"page={page}");
-                queryParams.Add($"limit={pageSize}");
-
-                var endpoint = $"api/projects?{string.Join("&", queryParams)}";
-                var result = await _ordsClient.GetAsync<SearchResult<Project>>(endpoint);
-
-                if (result == null)
-                {
-                    return Ok(new List<Project>());
-                }
-
-                return Ok(result.Items);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving projects");
-                return StatusCode(500, new { error = "Failed to retrieve projects", details = ex.Message });
-            }
+            return await _context.Projects.ToListAsync();
         }
 
+        // GET: api/Projects/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Project>> GetProject(int id)
+        public async Task<ActionResult<Project>> GetProject(decimal id)
         {
-            try
-            {
-                var endpoint = $"api/projects/{id}";
-                var project = await _ordsClient.GetAsync<Project>(endpoint);
+            var project = await _context.Projects.FindAsync(id);
 
-                if (project == null)
-                {
-                    return NotFound(new { error = $"Project with ID {id} not found" });
-                }
-
-                return Ok(project);
-            }
-            catch (Exception ex)
+            if (project == null)
             {
-                _logger.LogError(ex, "Error retrieving project {ProjectId}", id);
-                return StatusCode(500, new { error = "Failed to retrieve project", details = ex.Message });
+                return NotFound();
             }
+
+            return project;
         }
 
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Project>>> SearchProjects(
-            [FromQuery] string? query = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 50)
-        {
-            try
-            {
-                var queryParams = new List<string>();
-                if (!string.IsNullOrEmpty(query)) queryParams.Add($"q={Uri.EscapeDataString(query)}");
-                queryParams.Add($"page={page}");
-                queryParams.Add($"limit={pageSize}");
-
-                var endpoint = $"api/projects/search?{string.Join("&", queryParams)}";
-                var result = await _ordsClient.GetAsync<SearchResult<Project>>(endpoint);
-
-                if (result == null)
-                {
-                    return Ok(new List<Project>());
-                }
-
-                return Ok(result.Items);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error searching projects with query: {Query}", query);
-                return StatusCode(500, new { error = "Failed to search projects", details = ex.Message });
-            }
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Project>> CreateProject([FromBody] Project project)
-        {
-            try
-            {
-                var endpoint = "api/projects";
-                var result = await _ordsClient.PostAsync<Project>(endpoint, project);
-
-                if (result == null)
-                {
-                    return StatusCode(500, new { error = "Failed to create project" });
-                }
-
-                return CreatedAtAction(nameof(GetProject), new { id = result.Id }, result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating project");
-                return StatusCode(500, new { error = "Failed to create project", details = ex.Message });
-            }
-        }
-
+        // PUT: api/Projects/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<ActionResult<Project>> UpdateProject(int id, [FromBody] Project project)
+        public async Task<IActionResult> PutProject(decimal id, Project project)
         {
+            if (id != project.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(project).State = EntityState.Modified;
+
             try
             {
-                if (id != project.Id)
-                {
-                    return BadRequest(new { error = "Project ID mismatch" });
-                }
-
-                var endpoint = $"api/projects/{id}";
-                var result = await _ordsClient.PutAsync<Project>(endpoint, project);
-
-                if (result == null)
-                {
-                    return NotFound(new { error = $"Project with ID {id} not found" });
-                }
-
-                return Ok(result);
+                await _context.SaveChangesAsync();
             }
-            catch (Exception ex)
+            catch (DbUpdateConcurrencyException)
             {
-                _logger.LogError(ex, "Error updating project {ProjectId}", id);
-                return StatusCode(500, new { error = "Failed to update project", details = ex.Message });
+                if (!ProjectExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
             }
+
+            return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteProject(int id)
+        // POST: api/Projects
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Project>> PostProject(Project project)
         {
-            try
-            {
-                var endpoint = $"api/projects/{id}";
-                var success = await _ordsClient.DeleteAsync(endpoint);
+            _context.Projects.Add(project);
+            await _context.SaveChangesAsync();
 
-                if (!success)
-                {
-                    return NotFound(new { error = $"Project with ID {id} not found" });
-                }
+            return CreatedAtAction("GetProject", new { id = project.Id }, project);
+        }
 
-                return NoContent();
-            }
-            catch (Exception ex)
+        // DELETE: api/Projects/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProject(decimal id)
+        {
+            var project = await _context.Projects.FindAsync(id);
+            if (project == null)
             {
-                _logger.LogError(ex, "Error deleting project {ProjectId}", id);
-                return StatusCode(500, new { error = "Failed to delete project", details = ex.Message });
+                return NotFound();
             }
+
+            _context.Projects.Remove(project);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool ProjectExists(decimal id)
+        {
+            return _context.Projects.Any(e => e.Id == id);
         }
     }
 }

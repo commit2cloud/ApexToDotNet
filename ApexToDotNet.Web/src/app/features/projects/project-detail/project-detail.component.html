@@ -3,7 +3,7 @@
   <div class="project-header">
     <div class="header-row">
       <div class="back-button">
-        <a routerLink="/projects" class="btn-back">
+        <a routerLink="/sp-projects" class="btn-back">
           <span class="icon">↑</span> Projects
         </a>
       </div>
@@ -17,13 +17,13 @@
       </div>
     </div>
     
-    <h1 class="project-name">{{ project.name }}</h1>
+    <h1 class="project-name">{{ project.projectName }}</h1>
     
     <!-- Project Metadata Grid -->
     <div class="metadata-grid">
       <div class="metadata-item">
         <label>Initiative</label>
-        <div class="value">{{ project.initiativeName || 'Initiative 1' }}</div>
+        <div class="value">{{ project.initiative?.initiativeName || '-' }}</div>
       </div>
       <div class="metadata-item">
         <label>Focus Area</label>
@@ -31,32 +31,32 @@
       </div>
       <div class="metadata-item">
         <label>Owner</label>
-        <div class="value">John Doe</div>
+        <div class="value">{{ project.owner ? (project.owner.firstName + ' ' + project.owner.lastName) : '(No Owner)' }}</div>
       </div>
       <div class="metadata-item">
         <label>Completeness</label>
-        <div class="value">{{ getCompletionStatus() }} - {{ getCompletionPercentage() }}%</div>
+        <div class="value">{{ project.status?.status || 'Not Set' }} - {{ project.pctComplete || 0 }}%</div>
       </div>
       <div class="metadata-item">
         <label>Status</label>
-        <div class="value">{{ project.status || 'Not Set' }}</div>
+        <div class="value">{{ project.status?.status || 'Not Set' }}</div>
       </div>
       <div class="metadata-item">
         <label>Priority</label>
         <div class="value">
-          <span class="priority-badge" [class]="getPriorityClass(project.priority)">
-            {{ getPriorityLabel(project.priority) }}
+          <span class="priority-badge" [class]="getPriorityClass(project.priorityId)">
+            {{ getPriorityLabel(project.priorityId) }}
           </span>
         </div>
       </div>
       <div class="metadata-item">
         <label>Size</label>
-        <div class="value">M</div>
+        <div class="value">{{ project.projectSize || 'M' }}</div>
       </div>
       <div class="metadata-item">
         <label>Target</label>
         <div class="value">
-          <span class="badge badge-target">No Target (Alpha R1'10)</span>
+          <span class="badge badge-target">{{ project.targetComplete ? (project.targetComplete | date:'mediumDate') : 'No Target' }}</span>
         </div>
       </div>
       <div class="metadata-item">

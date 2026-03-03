@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ProjectService } from '../../../services/project.service';
-import { Project } from '../../../models/project';
+import { StrategicPlannerService } from '../../../services/strategic-planner.service';
+import {
+  ProjectDetail, Initiative, TeamMember, Release,
+  ProjectStatus, ProjectPriority
+} from '../../../models/strategic-planner.models';
 
 @Component({
   selector: 'app-project-edit',
@@ -19,25 +22,47 @@ export class ProjectEditComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
 
+  // Lookup data for dropdowns (matching APEX Page 24 LOVs)
+  initiatives: Initiative[] = [];
+  teamMembers: TeamMember[] = [];
+  releases: Release[] = [];
+  statuses: ProjectStatus[] = [];
+  priorities: ProjectPriority[] = [];
+
+  sizes = ['XS', 'S', 'M', 'L', 'XL'];
+  pctOptions = Array.from({ length: 11 }, (_, i) => i * 10);
+
   constructor(
     private fb: FormBuilder,
-    private projectService: ProjectService,
+    private plannerService: StrategicPlannerService,
     private route: ActivatedRoute,
     private router: Router
   ) {
     this.projectForm = this.fb.group({
-      projectName: ['', [Validators.required, Validators.maxLength(30)]],
-      taskName: ['', [Validators.required, Validators.maxLength(255)]],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
-      status: ['Pending', [Validators.required, Validators.maxLength(30)]],
-      assignedTo: ['', Validators.maxLength(30)],
-      cost: [null],
-      budget: [null]
-    }, { validators: this.dateRangeValidator });
+      projectName: ['', [Validators.required, Validators.maxLength(255)]],
+      initiativeId: [null],
+      ownerId: [null],
+      projectSize: ['M'],
+      priorityId: [null],
+      pctComplete: [0],
+      statusId: [null],
+      targetComplete: [''],
+      releaseId: [null],
+      tags: [''],
+      description: [''],
+      url: [''],
+      linkName: ['']
+    });
   }
 
   ngOnInit(): void {
+    // Load lookups
+    this.plannerService.getInitiatives().subscribe(d => this.initiatives = d);
+    this.plannerService.getTeamMembers().subscribe(d => this.teamMembers = d);
+    this.plannerService.getReleases().subscribe(d => this.releases = d);
+    this.plannerService.getStatuses().subscribe(d => this.statuses = d);
+    this.plannerService.getPriorities().subscribe(d => this.priorities = d);
+
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam && idParam !== 'new') {
       this.isEditMode = true;
@@ -48,16 +73,23 @@ export class ProjectEditComponent implements OnInit {
 
   loadProject(id: number): void {
     this.isLoading = true;
-    this.projectService.getProject(id).subscribe({
+    this.plannerService.getProject(id).subscribe({
       next: (project) => {
-        // Format dates for input[type="datetime-local"] or date
-        // Assuming API returns ISO string, we might need to extract YYYY-MM-DD
-        const formData = {
-          ...project,
-          startDate: this.formatDate(project.startDate),
-          endDate: this.formatDate(project.endDate)
-        };
-        this.projectForm.patchValue(formData);
+        this.projectForm.patchValue({
+          projectName: project.projectName,
+          initiativeId: project.initiativeId,
+          ownerId: project.ownerId,
+          projectSize: project.projectSize || 'M',
+          priorityId: project.priorityId,
+          pctComplete: project.pctComplete || 0,
+          statusId: project.statusId,
+          targetComplete: project.targetComplete ? this.formatDate(project.targetComplete) : '',
+          releaseId: project.releaseId,
+          tags: project.tags || '',
+          description: project.description || '',
+          url: project.url || '',
+          linkName: project.linkName || ''
+        });
         this.isLoading = false;
       },
       error: (err) => {
@@ -68,33 +100,26 @@ export class ProjectEditComponent implements OnInit {
     });
   }
 
-  private formatDate(date: Date | string | undefined): string {
-    if (!date) return '';
-    return new Date(date).toISOString().split('T')[0];
+  private formatDate(dateString: string): string {
+    if (!dateString) return '';
+    return new Date(dateString).toISOString().split('T')[0];
   }
 
   saveProject(): void {
-    if (this.projectForm.invalid) {
-      return;
-    }
+    if (this.projectForm.invalid) return;
 
     this.isLoading = true;
     const formValue = this.projectForm.value;
-    
-    // Construct payload
-    const projectData: Project = {
+
+    const projectData: Partial<ProjectDetail> = {
       ...formValue,
       id: this.projectId || 0,
-      // Ensure time component is handled if needed, for now just taking the date
-      startDate: new Date(formValue.startDate).toISOString(),
-      endDate: new Date(formValue.endDate).toISOString()
+      targetComplete: formValue.targetComplete ? new Date(formValue.targetComplete).toISOString() : null
     };
 
     if (this.isEditMode && this.projectId) {
-      this.projectService.updateProject(this.projectId, projectData).subscribe({
-        next: () => {
-          this.router.navigate(['/projects']);
-        },
+      this.plannerService.updateProject(this.projectId, projectData).subscribe({
+        next: () => this.router.navigate(['/sp-projects']),
         error: (err) => {
           console.error('Error updating project', err);
           this.errorMessage = 'Failed to update project.';
@@ -102,10 +127,8 @@ export class ProjectEditComponent implements OnInit {
         }
       });
     } else {
-      this.projectService.createProject(projectData).subscribe({
-        next: () => {
-          this.router.navigate(['/projects']);
-        },
+      this.plannerService.createProject(projectData).subscribe({
+        next: () => this.router.navigate(['/sp-projects']),
         error: (err) => {
           console.error('Error creating project', err);
           this.errorMessage = 'Failed to create project.';
@@ -113,12 +136,5 @@ export class ProjectEditComponent implements OnInit {
         }
       });
     }
-  }
-
-  // Custom validator to ensure StartDate <= EndDate
-  dateRangeValidator(group: AbstractControl): ValidationErrors | null {
-    const start = group.get('startDate')?.value;
-    const end = group.get('endDate')?.value;
-    return start && end && new Date(start) > new Date(end) ? { dateRangeInvalid: true } : null;
   }
 }

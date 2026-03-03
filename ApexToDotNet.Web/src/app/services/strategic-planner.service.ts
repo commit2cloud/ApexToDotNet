@@ -1,134 +1,138 @@
 // src/app/services/strategic-planner.service.ts
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of, forkJoin } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { ProjectService } from './project.service';
 import {
   Project,
+  ProjectDetail,
   Initiative,
   Release,
   Area,
   Activity,
-  Person,
-  PersonGroup,
-  ProjectGroup
+  TeamMember,
+  ProjectStatus,
+  ProjectPriority,
+  ActivityType,
+  TaskType,
+  NavigationCounts,
+  ProjectGroup,
+  PeopleGroup
 } from '../models/strategic-planner.models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StrategicPlannerService {
-  private apiUrl = environment.apiUrl;
+  private base = `${environment.apiUrl}/sp`;
 
-  constructor(
-    private http: HttpClient,
-    private projectService: ProjectService
-  ) {}
+  constructor(private http: HttpClient) {}
 
-  // Projects - use ProjectService which has mock fallback
+  // ─── Projects (/api/sp/SpProjects) ────────────────────────────
   getProjects(): Observable<Project[]> {
-    return this.projectService.getProjects();
+    return this.http.get<Project[]>(`${this.base}/SpProjects`);
   }
 
-  getProject(id: number): Observable<Project> {
-    return this.http.get<Project>(`${this.apiUrl}/projects/${id}`);
+  getProject(id: number): Observable<ProjectDetail> {
+    return this.http.get<ProjectDetail>(`${this.base}/SpProjects/${id}`);
   }
 
-  getRecentlyChangedProjects(limit: number = 10): Observable<Project[]> {
-    return this.http.get<Project[]>(`${this.apiUrl}/projects/recent?limit=${limit}`);
+  createProject(project: Partial<ProjectDetail>): Observable<ProjectDetail> {
+    return this.http.post<ProjectDetail>(`${this.base}/SpProjects`, project);
   }
 
-  searchProjects(query: string, options?: {limit?: number}): Observable<Project[]> {
-    const limit = options?.limit || 50;
-    return this.http.get<Project[]>(`${this.apiUrl}/projects/search?q=${encodeURIComponent(query)}&limit=${limit}`);
-  }
-
-  createProject(project: Partial<Project>): Observable<Project> {
-    return this.http.post<Project>(`${this.apiUrl}/projects`, project);
-  }
-
-  updateProject(id: number, project: Partial<Project>): Observable<Project> {
-    return this.http.put<Project>(`${this.apiUrl}/projects/${id}`, project);
+  updateProject(id: number, project: Partial<ProjectDetail>): Observable<void> {
+    return this.http.put<void>(`${this.base}/SpProjects/${id}`, project);
   }
 
   deleteProject(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/projects/${id}`);
+    return this.http.delete<void>(`${this.base}/SpProjects/${id}`);
   }
 
-  // Initiatives
+  // ─── Initiatives (/api/sp/Initiatives) ────────────────────────
   getInitiatives(): Observable<Initiative[]> {
-    return this.http.get<Initiative[]>(`${this.apiUrl}/initiatives`);
+    return this.http.get<Initiative[]>(`${this.base}/Initiatives`);
   }
 
-  getMyInitiatives(): Observable<Initiative[]> {
-    return this.http.get<Initiative[]>(`${this.apiUrl}/initiatives/my`);
+  getInitiative(id: number): Observable<Initiative> {
+    return this.http.get<Initiative>(`${this.base}/Initiatives/${id}`);
   }
 
-  // Releases
-  getReleases(): Observable<Release[]> {
-    return this.http.get<Release[]>(`${this.apiUrl}/releases`);
-  }
-
-  getMyOpenReleases(): Observable<Release[]> {
-    return this.http.get<Release[]>(`${this.apiUrl}/releases/my/open`);
-  }
-
-  // Areas
+  // ─── Areas (/api/sp/Areas) ────────────────────────────────────
   getAreas(): Observable<Area[]> {
-    return this.http.get<Area[]>(`${this.apiUrl}/areas`);
+    return this.http.get<Area[]>(`${this.base}/Areas`);
   }
 
-  // Activities
+  // ─── Releases (/api/sp/Releases) ─────────────────────────────
+  getReleases(): Observable<Release[]> {
+    return this.http.get<Release[]>(`${this.base}/Releases`);
+  }
+
+  // ─── Team Members (/api/sp/TeamMembers) ───────────────────────
+  getTeamMembers(): Observable<TeamMember[]> {
+    return this.http.get<TeamMember[]>(`${this.base}/TeamMembers`);
+  }
+
+  // ─── Activities (/api/sp/Activities) ──────────────────────────
   getActivities(): Observable<Activity[]> {
-    return this.http.get<Activity[]>(`${this.apiUrl}/activities`);
+    return this.http.get<Activity[]>(`${this.base}/Activities`);
   }
 
-  // People
-  getPeople(): Observable<Person[]> {
-    return this.http.get<Person[]>(`${this.apiUrl}/people`);
+  // ─── Lookups (/api/sp/Lookups) ────────────────────────────────
+  getStatuses(): Observable<ProjectStatus[]> {
+    return this.http.get<ProjectStatus[]>(`${this.base}/Lookups/statuses`);
   }
 
-  // People Groups
-  getPeopleGroups(): Observable<PersonGroup[]> {
-    return this.http.get<PersonGroup[]>(`${this.apiUrl}/people-groups`);
+  getPriorities(): Observable<ProjectPriority[]> {
+    return this.http.get<ProjectPriority[]>(`${this.base}/Lookups/priorities`);
   }
 
-  // Project Groups
+  getActivityTypes(): Observable<ActivityType[]> {
+    return this.http.get<ActivityType[]>(`${this.base}/Lookups/activity-types`);
+  }
+
+  getTaskTypes(): Observable<TaskType[]> {
+    return this.http.get<TaskType[]>(`${this.base}/Lookups/task-types`);
+  }
+
+  // ─── Project Groups (/api/sp/ProjectGroups) ──────────────────
   getProjectGroups(): Observable<ProjectGroup[]> {
-    return this.http.get<ProjectGroup[]>(`${this.apiUrl}/project-groups`);
+    return this.http.get<ProjectGroup[]>(`${this.base}/ProjectGroups`);
   }
 
-  // Navigation counts (for badges)
-  getNavigationCounts(): Observable<any> {
-    // Try API first, fallback to calculating from actual data
-    return this.http.get<any>(`${this.apiUrl}/dashboard/counts`).pipe(
-      catchError(() => {
-        // If API fails, calculate counts from the actual endpoints
-        return forkJoin({
-          projects: this.getProjects().pipe(catchError(() => of([]))),
-          areas: this.getAreas().pipe(catchError(() => of([]))),
-          initiatives: this.getInitiatives().pipe(catchError(() => of([]))),
-          activities: this.getActivities().pipe(catchError(() => of([]))),
-          people: this.getPeople().pipe(catchError(() => of([]))),
-          projectGroups: this.getProjectGroups().pipe(catchError(() => of([]))),
-          personGroups: this.getPeopleGroups().pipe(catchError(() => of([]))),
-          releases: this.getReleases().pipe(catchError(() => of([])))
-        }).pipe(
-          map(data => ({
-            projects: data.projects.length,
-            areas: data.areas.length,
-            initiatives: data.initiatives.length,
-            activities: data.activities.length,
-            people: data.people.length,
-            projectGroups: data.projectGroups.length,
-            personGroups: data.personGroups.length,
-            releases: data.releases.length
-          }))
-        );
-      })
+  // ─── People Groups (/api/sp/PeopleGroups) ────────────────────
+  getPeopleGroups(): Observable<PeopleGroup[]> {
+    return this.http.get<PeopleGroup[]>(`${this.base}/PeopleGroups`);
+  }
+
+  getPeopleGroup(id: number): Observable<PeopleGroup> {
+    return this.http.get<PeopleGroup>(`${this.base}/PeopleGroups/${id}`);
+  }
+
+  // ─── Navigation counts (for dashboard) ────────────────────────
+  getNavigationCounts(): Observable<NavigationCounts> {
+    return forkJoin({
+      projects: this.getProjects().pipe(catchError(() => of([]))),
+      areas: this.getAreas().pipe(catchError(() => of([]))),
+      initiatives: this.getInitiatives().pipe(catchError(() => of([]))),
+      activities: this.getActivities().pipe(catchError(() => of([]))),
+      people: this.getTeamMembers().pipe(catchError(() => of([]))),
+      releases: this.getReleases().pipe(catchError(() => of([]))),
+      projectGroups: this.getProjectGroups().pipe(catchError(() => of([]))),
+      peopleGroups: this.getPeopleGroups().pipe(catchError(() => of([])))
+    }).pipe(
+      map(data => ({
+        projects: data.projects.length,
+        areas: data.areas.length,
+        initiatives: data.initiatives.length,
+        activities: data.activities.length,
+        people: data.people.length,
+        releases: data.releases.length,
+        projectGroups: data.projectGroups.length,
+        peopleGroups: data.peopleGroups.length
+      }))
     );
   }
 }
