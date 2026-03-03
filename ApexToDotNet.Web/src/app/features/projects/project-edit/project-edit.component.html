@@ -1,87 +1,132 @@
-<div class="edit-container">
-  <div class="header">
-    <h2>{{ isEditMode ? 'Edit Project' : 'New Project' }}</h2>
-    <a routerLink="/projects" class="back-link">Back to List</a>
+<!-- APEX Page 24 - Create / Edit Project (Dialog-style form) -->
+<div class="apex-page">
+  <div class="apex-page-title">
+    <h1>{{ isEditMode ? 'Edit Project' : 'Create Project' }}</h1>
   </div>
 
-  <div *ngIf="errorMessage" class="error-message">
-    {{ errorMessage }}
+  <div *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</div>
+
+  <div class="apex-region">
+    <div class="apex-region-body">
+      <form [formGroup]="projectForm" (ngSubmit)="saveProject()">
+
+        <!-- Initiative (Select One) -->
+        <div class="apex-form-group">
+          <label for="initiativeId">Initiative</label>
+          <select id="initiativeId" formControlName="initiativeId">
+            <option [ngValue]="null">- Select Initiative -</option>
+            <option *ngFor="let i of initiatives" [ngValue]="i.id">{{ i.initiativeName }}</option>
+          </select>
+        </div>
+
+        <!-- Project Name (Text) -->
+        <div class="apex-form-group">
+          <label for="projectName" class="required">Project</label>
+          <input id="projectName" type="text" formControlName="projectName" placeholder="Enter project name">
+        </div>
+
+        <!-- Owner (Select One) -->
+        <div class="apex-form-group">
+          <label for="ownerId">Owner</label>
+          <select id="ownerId" formControlName="ownerId">
+            <option [ngValue]="null">- Select Owner -</option>
+            <option *ngFor="let t of teamMembers" [ngValue]="t.id">{{ t.firstName }} {{ t.lastName }}</option>
+          </select>
+        </div>
+
+        <div class="apex-form-row">
+          <!-- Size (Radio Group) -->
+          <div class="apex-form-group">
+            <label>Size</label>
+            <div class="radio-group">
+              <label *ngFor="let s of sizes" class="radio-option">
+                <input type="radio" formControlName="projectSize" [value]="s">
+                <span>{{ s }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Priority (Select List) -->
+          <div class="apex-form-group">
+            <label for="priorityId">Priority</label>
+            <select id="priorityId" formControlName="priorityId">
+              <option [ngValue]="null">- Select -</option>
+              <option *ngFor="let p of priorities" [ngValue]="p.id">P{{ p.priority }} {{ p.description || '' }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="apex-form-row">
+          <!-- Completeness (Select List 0-100%) -->
+          <div class="apex-form-group">
+            <label for="pctComplete">Completeness</label>
+            <select id="pctComplete" formControlName="pctComplete">
+              <option *ngFor="let p of pctOptions" [ngValue]="p">{{ p }}%</option>
+            </select>
+          </div>
+
+          <!-- Status (Select List) -->
+          <div class="apex-form-group">
+            <label for="statusId">Status</label>
+            <select id="statusId" formControlName="statusId">
+              <option [ngValue]="null">- Select -</option>
+              <option *ngFor="let s of statuses" [ngValue]="s.id">{{ s.status }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="apex-form-row">
+          <!-- Target Complete (Date Picker) -->
+          <div class="apex-form-group">
+            <label for="targetComplete">Target Complete</label>
+            <input id="targetComplete" type="date" formControlName="targetComplete">
+          </div>
+
+          <!-- Release (Select One) -->
+          <div class="apex-form-group">
+            <label for="releaseId">Release</label>
+            <select id="releaseId" formControlName="releaseId">
+              <option [ngValue]="null">- Select Release -</option>
+              <option *ngFor="let r of releases" [ngValue]="r.id">{{ r.releaseTrain }} {{ r.releaseName }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tags (Text — simplified from APEX Combobox) -->
+        <div class="apex-form-group">
+          <label for="tags">Tags</label>
+          <input id="tags" type="text" formControlName="tags" placeholder="Comma-separated tags">
+        </div>
+
+        <!-- Description (Textarea — simplified from Rich Text Editor) -->
+        <div class="apex-form-group">
+          <label for="description">Description</label>
+          <textarea id="description" formControlName="description" rows="4" placeholder="Project description"></textarea>
+        </div>
+
+        <div class="apex-form-row">
+          <!-- URL -->
+          <div class="apex-form-group">
+            <label for="url">URL</label>
+            <input id="url" type="url" formControlName="url" placeholder="https://...">
+          </div>
+
+          <!-- Link Name -->
+          <div class="apex-form-group">
+            <label for="linkName">Link Name</label>
+            <input id="linkName" type="text" formControlName="linkName" placeholder="Display text for URL">
+          </div>
+        </div>
+
+        <!-- Button Bar (APEX dialog footer) -->
+        <div class="apex-dialog-footer">
+          <button type="button" routerLink="/sp-projects" class="apex-btn apex-btn-secondary">Cancel</button>
+          <button *ngIf="isEditMode" type="button" class="apex-btn apex-btn-secondary" style="color:#c74634">Delete</button>
+          <button type="submit" [disabled]="projectForm.invalid || isLoading" class="apex-btn apex-btn-hot">
+            {{ isLoading ? 'Saving...' : (isEditMode ? 'Apply Changes' : 'Create Project') }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
-
-  <form [formGroup]="projectForm" (ngSubmit)="saveProject()" class="project-form">
-    
-    <div class="form-row">
-      <div class="form-group">
-        <label for="projectName">Project Name *</label>
-        <input id="projectName" type="text" formControlName="projectName" [class.invalid]="projectForm.get('projectName')?.invalid && projectForm.get('projectName')?.touched">
-        <div *ngIf="projectForm.get('projectName')?.invalid && projectForm.get('projectName')?.touched" class="error-text">
-          Project Name is required (max 30 chars).
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="taskName">Task Name *</label>
-        <input id="taskName" type="text" formControlName="taskName" [class.invalid]="projectForm.get('taskName')?.invalid && projectForm.get('taskName')?.touched">
-        <div *ngIf="projectForm.get('taskName')?.invalid && projectForm.get('taskName')?.touched" class="error-text">
-          Task Name is required (max 255 chars).
-        </div>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="startDate">Start Date *</label>
-        <input id="startDate" type="date" formControlName="startDate" [class.invalid]="projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched">
-      </div>
-
-      <div class="form-group">
-        <label for="endDate">End Date *</label>
-        <input id="endDate" type="date" formControlName="endDate" [class.invalid]="projectForm.get('endDate')?.invalid && projectForm.get('endDate')?.touched">
-      </div>
-    </div>
-    
-    <div *ngIf="projectForm.errors?.['dateRangeInvalid'] && (projectForm.get('startDate')?.touched || projectForm.get('endDate')?.touched)" class="error-text global-error">
-      Start Date cannot be after End Date.
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="status">Status *</label>
-        <select id="status" formControlName="status">
-          <option value="Pending">Pending</option>
-          <option value="Active">Active</option>
-          <option value="Closed">Closed</option>
-          <option value="On-Hold">On-Hold</option>
-          <option value="Open">Open</option>
-        </select>
-        <div *ngIf="projectForm.get('status')?.invalid && projectForm.get('status')?.touched" class="error-text">
-          Status is required.
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="assignedTo">Assigned To</label>
-        <input id="assignedTo" type="text" formControlName="assignedTo">
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="cost">Cost</label>
-        <input id="cost" type="number" formControlName="cost">
-      </div>
-
-      <div class="form-group">
-        <label for="budget">Budget</label>
-        <input id="budget" type="number" formControlName="budget">
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button type="button" routerLink="/projects" class="btn-cancel">Cancel</button>
-      <button type="submit" [disabled]="projectForm.invalid || isLoading" class="btn-save">
-        {{ isLoading ? 'Saving...' : 'Save Changes' }}
-      </button>
-    </div>
-  </form>
 </div>

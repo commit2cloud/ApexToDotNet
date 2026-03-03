@@ -3,22 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { StrategicPlannerService } from '../../services/strategic-planner.service';
-import { Project } from '../../models/strategic-planner.models';
-
-interface DashboardSection {
-  title: string;
-  count: number;
-  route: string;
-  icon: string;
-  color: string;
-}
-
-interface RecentActivity {
-  type: string;
-  title: string;
-  timestamp: Date;
-  user: string;
-}
+import { Project, Initiative, Release } from '../../models/strategic-planner.models';
 
 @Component({
   selector: 'app-home',
@@ -48,8 +33,20 @@ interface RecentActivity {
         <div class="section-header">
           <h2>My Initiatives</h2>
         </div>
-        <div class="content-area">
-          <div *ngIf="myInitiatives.length === 0" class="empty-state-inline">
+        <div *ngIf="myInitiatives.length > 0" class="projects-grid">
+          <div *ngFor="let init of myInitiatives" class="project-card" [routerLink]="['/initiatives']">
+            <div class="project-header">
+              <h3 class="project-name">{{ init.initiativeName }}</h3>
+            </div>
+            <p class="project-description">{{ init.objective || 'No description' }}</p>
+            <div class="project-footer">
+              <span class="meta-item">📋 {{ init.activeProjects || 0 }} projects</span>
+              <span *ngIf="init.area" class="meta-item">🎯 {{ init.area }}</span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="myInitiatives.length === 0" class="content-area">
+          <div class="empty-state-inline">
             <span class="empty-icon-small">🔍</span>
             <p>No data found</p>
           </div>
@@ -62,8 +59,19 @@ interface RecentActivity {
           <h2>My Open Releases</h2>
           <button class="expand-btn">›</button>
         </div>
-        <div class="content-area">
-          <div *ngIf="myOpenReleases.length === 0" class="empty-state-inline">
+        <div *ngIf="myOpenReleases.length > 0" class="projects-grid">
+          <div *ngFor="let rel of myOpenReleases" class="project-card" [routerLink]="['/releases']">
+            <div class="project-header">
+              <h3 class="project-name">{{ rel.releaseTrain }} {{ rel.releaseName }}</h3>
+            </div>
+            <div class="project-footer">
+              <span class="meta-item">📦 {{ rel.projects || 0 }} projects</span>
+              <span class="meta-item">{{ rel.releaseOwner }}</span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="myOpenReleases.length === 0" class="content-area">
+          <div class="empty-state-inline">
             <span class="empty-icon-small">🔍</span>
             <p>No data found</p>
           </div>
@@ -79,31 +87,30 @@ interface RecentActivity {
         <div class="projects-grid">
           <div *ngFor="let project of recentProjects" class="project-card">
             <div class="project-header">
-              <h3 class="project-name">{{ project.name }}</h3>
-              <span 
-                class="priority-badge" 
-                [ngClass]="'priority-' + project.priority">
-                P{{ project.priority }}
+              <h3 class="project-name">{{ project.projectName }}</h3>
+              <span *ngIf="project.priority" class="priority-badge"
+                [ngClass]="'priority-' + (project.priorityId || 3)">
+                {{ project.priority }}
               </span>
             </div>
-            <p class="project-description">{{ project.description }}</p>
+            <p class="project-description">{{ project.initiative || '' }}</p>
             <div class="project-meta">
               <span class="meta-item">
-                <span class="meta-icon">👥</span>
-                {{ project.personCount || 0 }} people
+                <span class="meta-icon">�</span>
+                {{ project.owner || 'Unassigned' }}
               </span>
-              <span class="meta-item">
-                <span class="meta-icon">⚡</span>
-                {{ project.activityCount || 0 }} activities
+              <span *ngIf="project.pctComplete !== undefined" class="meta-item">
+                <span class="meta-icon">📊</span>
+                {{ project.pctComplete }}% complete
               </span>
             </div>
             <div class="project-footer">
-              <span class="status-badge" [ngClass]="'status-' + (project.status || 'active')">
+              <span class="status-badge" [ngClass]="'status-' + (project.status || 'active' | lowercase)">
                 {{ project.status || 'Active' }}
               </span>
               <button 
                 class="btn-link" 
-                [routerLink]="['/projects', project.id]">
+                [routerLink]="['/sp-projects', project.id]">
                 View Details →
               </button>
             </div>
@@ -112,7 +119,7 @@ interface RecentActivity {
           <div *ngIf="recentProjects.length === 0" class="empty-state">
             <span class="empty-icon">📋</span>
             <p>No recently changed projects</p>
-            <button class="btn-primary" [routerLink]="['/projects']">
+            <button class="btn-primary" [routerLink]="['/sp-projects']">
               Browse Projects
             </button>
           </div>
@@ -480,11 +487,11 @@ interface RecentActivity {
   `]
 })
 export class HomeComponent implements OnInit {
-  searchQuery: string = '';
-  myInitiatives: any[] = [];
-  myOpenReleases: any[] = [];
+  searchQuery = '';
+  myInitiatives: Initiative[] = [];
+  myOpenReleases: Release[] = [];
   recentProjects: Project[] = [];
-  recentActivity: RecentActivity[] = [];
+  recentActivity: { type: string; title: string; timestamp: Date; user: string }[] = [];
 
   constructor(private plannerService: StrategicPlannerService) {}
 
@@ -493,19 +500,35 @@ export class HomeComponent implements OnInit {
   }
 
   onSearch() {
-    // Implement search functionality
     console.log('Search query:', this.searchQuery);
   }
 
   loadDashboardData() {
-    this.plannerService.searchProjects('', { limit: 6 }).subscribe({
-      next: (projects) => {
-        this.recentProjects = projects;
+    // Load projects from real API
+    this.plannerService.getProjects().subscribe({
+      next: (projects: Project[]) => {
+        this.recentProjects = projects.slice(0, 6);
       },
-      error: (error) => console.error('Error loading projects:', error)
+      error: (err: any) => console.error('Error loading projects:', err)
     });
 
-    // Mock recent activity (replace with real API call)
+    // Load initiatives
+    this.plannerService.getInitiatives().subscribe({
+      next: (initiatives: Initiative[]) => {
+        this.myInitiatives = initiatives;
+      },
+      error: (err: any) => console.error('Error loading initiatives:', err)
+    });
+
+    // Load releases
+    this.plannerService.getReleases().subscribe({
+      next: (releases: Release[]) => {
+        this.myOpenReleases = releases;
+      },
+      error: (err: any) => console.error('Error loading releases:', err)
+    });
+
+    // Recent activity (placeholder until we have audit/log API)
     this.recentActivity = [
       {
         type: 'project',
@@ -517,12 +540,6 @@ export class HomeComponent implements OnInit {
         type: 'activity',
         title: 'Activity "Design mockups" completed',
         timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
-        user: 'APEXDOTNET'
-      },
-      {
-        type: 'initiative',
-        title: 'Initiative "Q1 2026 Goals" updated',
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
         user: 'APEXDOTNET'
       }
     ];

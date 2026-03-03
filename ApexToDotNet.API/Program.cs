@@ -25,12 +25,18 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Add DbContext if needed (optional for now)
-// Uncomment when ready to use Entity Framework
-// builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//     options.UseOracle(builder.Configuration.GetConnectionString("OracleAPEX")));
+// Add DbContext with InMemory provider for now
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseInMemoryDatabase("StrategicPlannerDb"));
 
 var app = builder.Build();
+
+// Ensure the InMemory database is created and seeded
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.EnsureCreated();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

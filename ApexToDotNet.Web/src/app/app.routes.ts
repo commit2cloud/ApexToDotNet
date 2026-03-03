@@ -1,15 +1,30 @@
 import { Routes } from '@angular/router';
+import { HomeComponent } from './features/home/home.component';
+import { AreasComponent } from './features/areas/areas.component';
+import { InitiativesComponent } from './features/initiatives/initiatives.component';
 import { ProjectListComponent } from './features/projects/project-list/project-list.component';
 import { ProjectEditComponent } from './features/projects/project-edit/project-edit.component';
-import { SessionListComponent } from './features/sessions/session-list/session-list.component';
-import { SessionEditComponent } from './features/sessions/session-edit/session-edit.component';
+import { ProjectDetailComponent } from './features/projects/project-detail/project-detail.component';
+import { ProjectGroupsComponent } from './features/project-groups/project-groups.component';
+import { ActivitiesComponent } from './features/activities/activities.component';
+import { ReleasesComponent } from './features/releases/releases.component';
+import { PeopleComponent } from './features/people/people.component';
+import { PeopleGroupsComponent } from './features/people-groups/people-groups.component';
+import { ReportsComponent } from './features/reports/reports.component';
 
 export const routes: Routes = [
-  { path: 'projects', component: ProjectListComponent },
-  { path: 'projects/new', component: ProjectEditComponent },
-  { path: 'projects/:id', component: ProjectEditComponent },
-  { path: 'sessions', component: SessionListComponent },
-  { path: 'sessions/new', component: SessionEditComponent },
-  { path: 'sessions/:id', component: SessionEditComponent },
-  { path: '', redirectTo: '/projects', pathMatch: 'full' }
+  { path: '', component: HomeComponent },
+  { path: 'areas', component: AreasComponent },
+  { path: 'initiatives', component: InitiativesComponent },
+  { path: 'sp-projects', component: ProjectListComponent },
+  { path: 'sp-projects/new', component: ProjectEditComponent },
+  { path: 'sp-projects/:id', component: ProjectDetailComponent },
+  { path: 'sp-projects/:id/edit', component: ProjectEditComponent },
+  { path: 'project-groups', component: ProjectGroupsComponent },
+  { path: 'activities', component: ActivitiesComponent },
+  { path: 'releases', component: ReleasesComponent },
+  { path: 'people', component: PeopleComponent },
+  { path: 'people-groups', component: PeopleGroupsComponent },
+  { path: 'reports', component: ReportsComponent },
+  { path: '**', redirectTo: '' }
 ];

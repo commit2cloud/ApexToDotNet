@@ -1,50 +1,166 @@
-<div class="project-list-container">
-  <div class="header">
-    <div class="title-section">
-      <h2>Projects</h2>
-      <p class="subtitle">Manage your calendar projects and tasks</p>
+<!-- APEX Page 23 - Projects (Faceted Search + Content Row Cards) -->
+<div class="apex-page">
+  <div class="apex-page-title">
+    <h1>Projects</h1>
+    <a routerLink="/sp-projects/new" class="apex-btn apex-btn-hot">
+      ＋ Create Project
+    </a>
+  </div>
+
+  <div class="apex-faceted-layout">
+    <!-- Left Column: Faceted Search (APEX Faceted Search region) -->
+    <div class="apex-facet-panel">
+      <div class="facet-search">
+        <input
+          type="text"
+          class="facet-search-input"
+          placeholder="Search..."
+          [(ngModel)]="searchQuery"
+          (input)="applyFilters()">
+      </div>
+
+      <!-- Area facet -->
+      <div class="facet-group" *ngIf="areas.length > 0">
+        <div class="apex-facet-title">▸ Area</div>
+        <label *ngFor="let a of areas" class="facet-option">
+          <input type="radio" name="area"
+            [checked]="selectedArea === a.areaName"
+            (change)="selectedArea = a.areaName; applyFilters()">
+          <span>{{ a.areaName }}</span>
+        </label>
+        <label class="facet-option" *ngIf="selectedArea">
+          <input type="radio" name="area" (change)="selectedArea = null; applyFilters()">
+          <span class="clear-filter">Clear</span>
+        </label>
+      </div>
+
+      <!-- Initiative facet -->
+      <div class="facet-group" *ngIf="initiatives.length > 0">
+        <div class="apex-facet-title">▸ Initiative</div>
+        <label *ngFor="let i of initiatives" class="facet-option">
+          <input type="radio" name="initiative"
+            [checked]="selectedInitiative === i.initiativeName"
+            (change)="selectedInitiative = i.initiativeName; applyFilters()">
+          <span>{{ i.initiativeName }}</span>
+        </label>
+        <label class="facet-option" *ngIf="selectedInitiative">
+          <input type="radio" name="initiative" (change)="selectedInitiative = null; applyFilters()">
+          <span class="clear-filter">Clear</span>
+        </label>
+      </div>
+
+      <!-- Release facet -->
+      <div class="facet-group" *ngIf="releases.length > 0">
+        <div class="apex-facet-title">▸ Release</div>
+        <label *ngFor="let r of releases" class="facet-option">
+          <input type="checkbox"
+            [checked]="selectedRelease === (r.releaseTrain + ' ' + r.releaseName)"
+            (change)="selectedRelease = selectedRelease === (r.releaseTrain + ' ' + r.releaseName) ? null : (r.releaseTrain + ' ' + r.releaseName); applyFilters()">
+          <span>{{ r.releaseTrain }} {{ r.releaseName }}</span>
+        </label>
+      </div>
+
+      <!-- Owner facet -->
+      <div class="facet-group" *ngIf="uniqueOwners.length > 0">
+        <div class="apex-facet-title">▸ Owner</div>
+        <label *ngFor="let o of uniqueOwners" class="facet-option">
+          <input type="checkbox" [checked]="selectedOwners.has(o.name)" (change)="toggleOwner(o.name)">
+          <span>{{ o.name }} ({{ o.count }})</span>
+        </label>
+      </div>
+
+      <!-- Tags facet -->
+      <div class="facet-group" *ngIf="uniqueTags.length > 0">
+        <div class="apex-facet-title">▸ Tags</div>
+        <label *ngFor="let t of uniqueTags" class="facet-option">
+          <input type="checkbox" [checked]="selectedTags.has(t.tag)" (change)="toggleTag(t.tag)">
+          <span>{{ t.tag }} ({{ t.count }})</span>
+        </label>
+      </div>
+
+      <!-- Priority facet -->
+      <div class="facet-group" *ngIf="priorities.length > 0">
+        <div class="apex-facet-title">▸ Priority</div>
+        <label *ngFor="let p of priorities" class="facet-option">
+          <input type="checkbox" [checked]="selectedPriorities.has(p.id)" (change)="togglePriority(p.id)">
+          <span>P{{ p.priority }} {{ p.description || '' }}</span>
+        </label>
+      </div>
+
+      <!-- Status facet -->
+      <div class="facet-group" *ngIf="statuses.length > 0">
+        <div class="apex-facet-title">▸ Status</div>
+        <label *ngFor="let s of statuses" class="facet-option">
+          <input type="checkbox" [checked]="selectedStatuses.has(s.status)" (change)="toggleStatus(s.status)">
+          <span>{{ s.status }}</span>
+        </label>
+      </div>
+
+      <button *ngIf="hasActiveFilters"
+        class="apex-btn apex-btn-secondary apex-btn-sm clear-all-btn"
+        (click)="clearFilters()">
+        Clear All Filters
+      </button>
     </div>
-    <a routerLink="/projects/new" class="btn-primary">Add Project</a>
-  </div>
 
-  <div *ngIf="isLoading" class="loading">
-    Loading projects...
-  </div>
+    <!-- Body: Content Row Cards -->
+    <div class="projects-body">
+      <div *ngIf="isLoading" class="apex-loading">Loading projects...</div>
 
+      <div *ngIf="!isLoading && filteredProjects.length === 0" class="apex-empty-state">
+        No projects match your criteria.
+      </div>
 
-  <div *ngIf="!isLoading && projects.length === 0" class="empty-state">
-    No projects found.
-  </div>
+      <div class="project-results-count" *ngIf="!isLoading && filteredProjects.length > 0">
+        {{ filteredProjects.length }} project{{ filteredProjects.length !== 1 ? 's' : '' }}
+      </div>
 
-  <table *ngIf="!isLoading && projects.length > 0" class="project-table">
-    <thead>
-      <tr>
-        <th>Project Name</th>
-        <th>Task</th>
-        <th>Start Date</th>
-        <th>End Date</th>
-        <th>Status</th>
-        <th>Assigned To</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let project of projects">
-        <td>{{ project.projectName }}</td>
-        <td>{{ project.taskName }}</td>
-        <td>{{ project.startDate | date }}</td>
-        <td>{{ project.endDate | date }}</td>
-        <td>
-          <span class="status-badge" [class.status-active]="project.status === 'Active'" [class.status-pending]="project.status === 'Pending'">
+      <!-- Content Row style cards (APEX Content Row template) -->
+      <div *ngFor="let project of filteredProjects" class="content-row-card" [routerLink]="['/sp-projects', project.id]">
+        <div class="cr-icon" [ngClass]="getPctClass(project.pctComplete)">
+          {{ project.pctComplete || 0 }}%
+        </div>
+        <div class="cr-body">
+          <div class="cr-title">{{ project.projectName }}</div>
+          <div class="cr-description">
+            <span *ngIf="project.area" class="cr-meta-tag cr-area-tag">{{ project.area }}</span>
+            <span class="cr-meta-separator" *ngIf="project.area && project.initiative">/</span>
+            <span *ngIf="project.initiative" class="cr-meta-tag">{{ project.initiative }}</span>
+            <span *ngIf="project.release" class="cr-release-badge">{{ project.release }}</span>
+            <ng-container *ngIf="!project.release">
+              <span class="cr-release-badge cr-no-target">No Target</span>
+            </ng-container>
+          </div>
+          <div class="cr-meta">
+            <span *ngIf="project.owner">{{ project.owner }}</span>
+            <span class="cr-meta-sep" *ngIf="project.owner && project.priority"> – </span>
+            <span *ngIf="project.priority">{{ project.priority }}</span>
+            <span class="cr-meta-sep" *ngIf="project.priority && project.pctComplete !== undefined"> – </span>
+            <span *ngIf="project.pctComplete !== undefined">{{ project.pctComplete }}%</span>
+            <span class="cr-meta-sep" *ngIf="project.pctComplete !== undefined && project.projectSize"> – </span>
+            <span *ngIf="project.projectSize">{{ project.projectSize }}</span>
+            <ng-container *ngIf="project.tags">
+              <span class="cr-meta-sep"> … </span>
+              <span>{{ project.tags }}</span>
+            </ng-container>
+          </div>
+          <div class="cr-focus-area" *ngIf="project.area">
+            Focus Area: {{ project.area }}
+          </div>
+        </div>
+        <div class="cr-badges">
+          <span *ngIf="project.priority" class="apex-badge apex-badge-blue">{{ project.priority }}</span>
+          <span *ngIf="project.status" class="apex-badge"
+            [ngClass]="{
+              'apex-badge-green': project.status === 'Open',
+              'apex-badge-blue': project.status === 'In Review',
+              'apex-badge-yellow': project.status === 'On Hold',
+              'apex-badge-gray': project.status === 'Closed'
+            }">
             {{ project.status }}
           </span>
-        </td>
-        <td>{{ project.assignedTo }}</td>
-        <td class="actions">
-          <a [routerLink]="['/projects', project.id]" class="btn-edit">Edit</a>
-          <button (click)="deleteProject(project.id)" class="btn-delete">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

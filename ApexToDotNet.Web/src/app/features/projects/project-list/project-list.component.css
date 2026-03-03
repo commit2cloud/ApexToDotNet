@@ -1,109 +1,182 @@
-.project-list-container {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+/* APEX Page 23 - Projects with Faceted Search + Content Row Cards */
+
+/* Facet panel internals */
+.facet-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 16px;
 }
 
-.header {
-  margin-bottom: 24px;
+.facet-search-input:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+  outline: none;
+}
+
+.facet-group {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.facet-option {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.title-section h2 {
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
   color: #333;
-  margin-bottom: 8px;
-  margin-top: 0;
+  cursor: pointer;
 }
 
-.subtitle {
-  color: #666;
+.facet-option input[type="checkbox"],
+.facet-option input[type="radio"] {
+  width: auto;
   margin: 0;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 14px;
+.clear-filter {
+  color: #1a73e8;
+  font-size: 12px;
 }
 
-.btn-primary:hover {
-  background-color: #0056b3;
-}
-
-.project-table {
+.clear-all-btn {
   width: 100%;
-  border-collapse: collapse;
-  background: white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-top: 8px;
+}
+
+/* Results body */
+.projects-body {
+  min-height: 200px;
+}
+
+.project-results-count {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+/* Content Row Card (matches APEX Content Row template) */
+.content-row-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
   border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  padding: 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
 }
 
-.project-table th, 
-.project-table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
+.content-row-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
-.project-table th {
-  background-color: #f8f9fa;
+/* Completion % circle */
+.cr-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.cr-icon.pct-low { background: #dc3545; }
+.cr-icon.pct-mid { background: #ffc107; color: #333; }
+.cr-icon.pct-high { background: #28a745; }
+.cr-icon.pct-done { background: #17a2b8; }
+
+/* Body */
+.cr-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cr-title {
+  font-size: 15px;
   font-weight: 600;
-  color: #495057;
+  color: #1a73e8;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.status-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  background-color: #e9ecef;
-  color: #495057;
+.cr-description {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
 }
 
-.status-active {
-  background-color: #d3f9d8;
-  color: #2b8a3e;
-}
-
-.status-pending {
-  background-color: #fff3bf;
-  color: #f08c00;
-}
-
-.btn-delete {
-  padding: 6px 12px;
-  background-color: #fa5252;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.btn-delete:hover {
-  background-color: #c92a2a;
-}
-
-.btn-edit {
-  padding: 6px 12px;
-  background-color: #f8f9fa;
-  color: #333;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  text-decoration: none;
-  margin-right: 8px;
+.cr-meta-tag {
   display: inline-block;
+  background: #e8eef5;
+  color: #4a6785;
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-size: 11px;
 }
 
-.btn-edit:hover {
-  background-color: #e9ecef;
-  text-decoration: none;
+.cr-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #888;
+}
+
+/* Badges column */
+.cr-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+/* APEX-style description row: Area / Initiative + Release badge */
+.cr-area-tag {
+  background: transparent;
+  color: #666;
+  padding: 0;
+  font-size: 12px;
+}
+
+.cr-meta-separator {
+  color: #999;
+  font-size: 12px;
+}
+
+.cr-release-badge {
+  display: inline-block;
+  background: #0572ec;
+  color: #fff;
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.cr-release-badge.cr-no-target {
+  background: #dc3545;
+}
+
+.cr-meta-sep {
+  color: #bbb;
+}
+
+.cr-focus-area {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 2px;
 }
